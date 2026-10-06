@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>薬局POPスタジオ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=M+PLUS+Rounded+1c:wght@500;800;900&family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+<style id="pageSize"></style>
+<style>
+/* 画面UI: 左=つくるもの・用紙・デザイン / 中央=プレビュー / 右=文面。ポスター自体の色は店舗設定から生成 */
+:root{
+  --bg:#edf1ef; --panel:#ffffff; --ink:#1c2422; --muted:#5d6966; --line:#d7dfdb;
+  --ua:#2f8f5b; --ua-deep:#1d5c3a; --ua-soft:#e8f3ed;
+  --ui-font:'Noto Sans JP','Hiragino Sans','Yu Gothic UI','Meiryo',sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui-font);font-size:14px;line-height:1.6}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ua);outline-offset:2px}
+
+#app{display:flex;flex-direction:column;height:100%}
+.top{display:flex;align-items:center;gap:16px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:.04em}
+.brand svg{width:22px;height:22px}
+.shop-chip{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 14px 5px 6px;cursor:pointer;min-width:0}
+.shop-chip:hover{border-color:var(--ua)}
+.shop-chip i{width:24px;height:24px;border-radius:50%;background:var(--ua);flex:none}
+.shop-chip span{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.shop-chip small{color:var(--muted);font-size:12px}
+.top-actions{margin-left:auto;display:flex;gap:8px}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 16px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--ua);color:var(--ua-deep)}
+.btn.primary{background:var(--ua-deep);border-color:var(--ua-deep);color:#fff}
+.btn.primary:hover{filter:brightness(1.1);color:#fff}
+.btn.ghost{background:transparent}
+.btn.small{padding:5px 10px;font-size:13px}
+
+.banner{background:#fff6dc;border-bottom:1px solid #ecd9a0;padding:8px 16px;font-size:13px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.banner button{border:0;background:none;color:#7a5a00;text-decoration:underline;cursor:pointer;padding:0}
+
+.work{flex:1;min-height:0;display:grid;grid-template-columns:290px minmax(0,1fr) 350px}
+.side{background:var(--panel);overflow-y:auto;padding:4px 16px 24px}
+.side.left{border-right:1px solid var(--line)}
+.side.right{border-left:1px solid var(--line)}
+.side section{padding-block:14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.side section:last-child{border-bottom:0}
+.side h2{margin:0;font-size:12px;letter-spacing:.12em;color:var(--muted);font-weight:700}
+
+.seg{display:flex;background:var(--bg);border-radius:8px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:transparent;border-radius:6px;padding:6px 4px;cursor:pointer;font-size:13px;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--panel);font-weight:700;color:var(--ua-deep);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+
+.tpl-list{display:flex;flex-direction:column;gap:4px}
+.tpl-list button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:1px solid transparent;background:transparent;border-radius:8px;padding:7px 10px;cursor:pointer}
+.tpl-list button:hover{background:var(--bg)}
+.tpl-list button[aria-pressed="true"]{border-color:var(--ua);background:var(--ua-soft)}
+.tpl-list b{font-size:13.5px}
+.tpl-list small{color:var(--muted);font-size:12px}
+
+.size-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.size-grid button{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.3}
+.size-grid button b{font-size:13px}
+.size-grid button small{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.size-grid button[aria-pressed="true"]{border-color:var(--ua);background:var(--ua-soft);color:var(--ua-deep)}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13px;cursor:pointer}
+.check input{margin-top:4px}
+.check[aria-disabled="true"]{opacity:.45;cursor:default}
+
+.mood-list{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.mood-list button{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 8px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:2px}
+.mood-list button[aria-pressed="true"]{border-color:var(--ua);background:var(--ua-soft)}
+.mood-list .aa{font-size:18px;line-height:1.2}
+.mood-list small{font-size:11.5px;color:var(--muted);line-height:1.3}
+.mood-list .auto{grid-column:1/-1}
+
+.stage{position:relative;min-width:0;min-height:0;display:flex;flex-direction:column;background:
+  radial-gradient(circle, rgba(0,0,0,.06) 1px, transparent 1.2px) 0 0/18px 18px, var(--bg)}
+.stage-inner{flex:1;min-height:0;display:grid;place-items:center;padding:24px;overflow:hidden}
+#sheetWrap{position:relative;box-shadow:0 2px 6px rgba(0,0,0,.08),0 16px 40px rgba(20,40,30,.16)}
+#sheetWrap > .sheet{position:absolute;left:0;top:0;transform-origin:0 0}
+.stage-meta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;padding:0 16px 12px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.stage-meta .warn{color:#a13d1f;font-weight:700}
+
+.field{display:flex;flex-direction:column;gap:4px}
+.field label,.field .lbl{font-size:12.5px;font-weight:700}
+.field .hint{font-size:11.5px;color:var(--muted)}
+.field input[type=text],.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;background:#fbfcfb}
+.field textarea{resize:vertical;line-height:1.55}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--ua);outline:none;background:#fff}
+.fields{display:flex;flex-direction:column;gap:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.img-field{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.img-field img{width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+.img-field input[type=file]{font-size:12px;max-width:100%}
+details.more{border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
+details.more summary{cursor:pointer;font-size:13px;color:var(--muted)}
+details.more .fields{margin-top:10px}
+.law{font-size:11.5px;color:#7a5a00;background:#fff6dc;border-radius:6px;padding:6px 8px;line-height:1.5}
+
+/* ---------- モーダル（店舗設定） ---------- */
+.modal{position:fixed;inset:0;background:rgba(18,28,24,.55);display:grid;place-items:center;padding:16px;z-index:50}
+.modal-card{background:var(--panel);border-radius:14px;width:min(1120px,100%);height:min(900px,calc(100vh - 32px));display:grid;grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:minmax(0,1fr);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.wiz-form{overflow-y:auto;padding:28px 32px;display:flex;flex-direction:column;gap:22px}
+.wiz-form h1{margin:0;font-size:22px}
+.wiz-form .lead{margin:4px 0 0;color:var(--muted)}
+.wiz-step{display:flex;flex-direction:column;gap:10px}
+.wiz-step > h3{margin:0;font-size:14px;display:flex;align-items:center;gap:8px}
+.wiz-step > h3 em{font-style:normal;width:22px;height:22px;border-radius:50%;background:var(--ua-deep);color:#fff;display:grid;place-items:center;font-size:12px}
+.wiz-step > h3 small{font-weight:400;color:var(--muted);font-size:12px}
+.swatches{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.swatches button{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0}
+.swatches button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+.swatches label{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);margin-left:6px}
+.swatches input[type=color]{width:40px;height:34px;border:1px solid var(--line);border-radius:8px;padding:2px;background:#fff;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips label{cursor:pointer}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips span{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;background:#fff}
+.chips input:checked + span{background:var(--ua-deep);border-color:var(--ua-deep);color:#fff}
+.chips input:focus-visible + span{outline:2px solid var(--ua);outline-offset:2px}
+.moods{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.moods label{cursor:pointer;position:relative}
+.moods input{position:absolute;opacity:0;pointer-events:none}
+.moods .card{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;height:100%}
+.moods .aa{font-size:22px;line-height:1.2}
+.moods b{font-size:13px}
+.moods small{font-size:11.5px;color:var(--muted);line-height:1.4}
+.moods input:checked + .card{border-color:var(--ua-deep);box-shadow:inset 0 0 0 1px var(--ua-deep);background:var(--ua-soft)}
+.moods input:focus-visible + .card{outline:2px solid var(--ua);outline-offset:2px}
+.wiz-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wiz-grid .full{grid-column:1/-1}
+.wiz-preview{background:var(--bg);border-left:1px solid var(--line);display:flex;flex-direction:column;padding:20px;gap:12px;min-height:0}
+.wiz-preview h4{margin:0;font-size:12px;letter-spacing:.12em;color:var(--muted)}
+.wiz-preview .pv{flex:1;min-height:0;display:grid;place-items:center}
+.wiz-preview .pv > div{position:relative;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+.wiz-preview .pv .sheet{position:absolute;left:0;top:0;transform-origin:0 0}
+.wiz-preview p{margin:0;font-size:12px;color:var(--muted)}
+.wiz-actions{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;padding-top:6px;border-top:1px solid var(--line)}
+.wiz-actions .grp{display:flex;gap:8px;flex-wrap:wrap}
+.req{color:#a13d1f;font-size:11px;margin-left:4px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1c2422;color:#fff;padding:10px 18px;border-radius:10px;font-size:13.5px;z-index:60;max-width:calc(100% - 32px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+
+@media (max-width:1100px){
+  .work{grid-template-columns:minmax(0,1fr);overflow-y:auto}
+  .side{overflow:visible}
+  .side.left,.side.right{border:0;border-bottom:1px solid var(--line)}
+  .stage{min-height:75vh;order:-1}
+  .modal-card{grid-template-columns:1fr}
+  .wiz-preview{display:none}
+}
+@media (max-width:600px){
+  .wiz-form{padding:20px 16px}
+  .moods{grid-template-columns:1fr 1fr}
+  .wiz-grid{grid-template-columns:1fr}
+  .top-actions{margin-left:0;width:100%}
+  .top-actions .btn{flex:1}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* =========================================================
+   ポスター本体（印刷物）
+   単位は用紙の短辺基準(cqmin)。--k は文字量に応じた自動縮小率
+   ========================================================= */
+.sheet{position:relative;overflow:hidden;background:var(--paper);color:var(--ink);font-family:var(--fb);container-type:size;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;--pad:6.5cqmin;font-weight:500}
+.sheet *{box-sizing:border-box}
+.deco{position:absolute;inset:0;z-index:0;pointer-events:none}
+.deco i{position:absolute;display:block}
+.inner{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;gap:1.1em;padding:var(--pad);
+  font-size:calc(var(--k) * 2.35cqmin);line-height:1.6;overflow:hidden}
+.c-pop .inner{font-size:calc(var(--k) * 3.1cqmin)}
+.hd{position:relative;flex:none}
+.title{font-family:var(--ft);font-weight:var(--tw);font-size:2.9em;line-height:1.28;margin:0;letter-spacing:.03em;color:var(--pd);text-wrap:balance;word-break:auto-phrase}
+.c-flyer .title{font-size:3.1em}
+.c-pop .title{font-size:2.5em}
+.sub{margin:.45em 0 0;font-size:1.25em;font-weight:700;line-height:1.5;text-wrap:balance}
+.eyebrow{margin-bottom:.6em}
+.eyebrow span{display:inline-block;background:var(--a);color:var(--ona);padding:.2em .9em;border-radius:calc(var(--r) * 1em);font-weight:700;font-size:1.05em;line-height:1.5}
+.risk{display:inline-block;border:.12em solid var(--ink);background:var(--paper);color:var(--ink);padding:.05em .6em;font-size:.8em;font-weight:700;margin-bottom:.8em}
+.bd{flex:1 0 auto;display:flex;flex-direction:column;gap:1.2em}
+.col{flex:1 0 auto;display:flex;flex-direction:column;gap:1.2em;justify-content:flex-start;min-width:0}
+.c-notice .col{justify-content:center}
+.c-pop .col{justify-content:space-between}
+.txt{display:flex;flex-direction:column;gap:1em}
+.body{margin:0}
+.body.comment{border:.14em dashed var(--p);border-radius:calc(var(--r) * 1em + .2em);padding:.8em 1em;background:var(--paper)}
+.points{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.55em}
+.points li{display:flex;gap:.6em;align-items:flex-start}
+.c-notice .points{background:var(--ps);padding:1.1em 1.3em;border-radius:calc(var(--r) * 1.2em);font-size:1.12em;font-weight:700}
+.mk{flex:none;width:1.25em;height:1.25em;margin-top:.18em;border-radius:50%;background:var(--p);position:relative}
+.mk::after{content:"";position:absolute;left:.43em;top:.2em;width:.32em;height:.62em;border:solid var(--onp);border-width:0 .15em .15em 0;transform:rotate(45deg)}
+.date{display:flex;align-items:center;gap:.8em;flex-wrap:wrap;font-size:1.3em;font-weight:700;color:var(--pd);line-height:1.4}
+.date b{background:var(--p);color:var(--onp);font-size:.62em;padding:.25em .8em;border-radius:calc(var(--r) * 1em)}
+.note{margin:0;font-size:.82em;opacity:.85}
+.sign{margin:0;text-align:right;font-weight:700}
+.photo{margin:0;flex:none;border-radius:calc(var(--r) * 1.2em);overflow:hidden;background:var(--ps)}
+.photo img{display:block;width:100%;height:100%;object-fit:cover}
+.port .photo{height:26cqh}
+.c-pop.port .photo{height:30cqh}
+.land.has-photo .bd{flex-direction:row}
+.land .photo{width:38%;height:auto;min-height:20cqh}
+.logo{height:1.6em;width:auto;vertical-align:middle;object-fit:contain}
+
+/* 価格 */
+.price{align-self:flex-end;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-end;gap:.1em .15em;color:var(--price);font-family:var(--ft);font-weight:900;line-height:1}
+.price .num{font-size:4em;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.price .yen{font-size:1.5em}
+.price .tax{font-size:.9em;margin-right:.2em}
+.price .pn{flex-basis:100%;text-align:right;font-size:.62em;font-weight:500;font-family:var(--fb);color:var(--ink);margin-top:.5em}
+
+/* フッター */
+.ft{flex:none}
+.ft-simple{display:flex;justify-content:space-between;align-items:center;gap:.5em 1em;flex-wrap:wrap;border-top:.12em solid var(--pt);padding-top:.8em;font-size:.95em}
+.ft-simple .shop-name{font-family:var(--ft);font-weight:var(--tw);font-size:1.3em;display:flex;align-items:center;gap:.4em}
+.c-pop .ft-simple{justify-content:center;border:0;padding:0;font-size:.75em}
+.ft-full{margin:0 calc(var(--pad) * -1) calc(var(--pad) * -1);padding:calc(var(--pad) * .7) var(--pad);background:var(--pd);color:#fff;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:.9em 2em;align-items:center;font-size:.88em}
+.ft-shop{display:flex;align-items:center;gap:.6em;min-width:0}
+.ft-shop .logo{height:3em;background:#fff;border-radius:.3em;padding:.2em}
+.ft-full .shop-name{font-family:var(--ft);font-weight:var(--tw);font-size:1.9em;line-height:1.25}
+.ft-full .tagline{font-size:.95em;opacity:.9;margin-top:.2em}
+.ft-full dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.15em 1em;margin:0}
+.ft-full dt{font-weight:700;opacity:.75}
+.ft-full dd{margin:0}
+.badges{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:.4em}
+.badges span{border:.1em solid currentColor;padding:.12em .75em;border-radius:calc(var(--r) * 1em + .15em);font-size:.85em}
+.port.c-flyer .ft-full{grid-template-columns:minmax(0,1fr)}
+.c-flyer .points{display:grid;grid-template-columns:repeat(auto-fit,minmax(13em,1fr));gap:.7em}
+.c-flyer .points li{background:var(--ps);padding:.8em 1em;border-radius:calc(var(--r) * 1em);font-weight:700;line-height:1.45}
+
+/* レイアウト案 A: 帯 / B: 額縁 / C: 色面 */
+.v0 .hd,.v2 .hd{margin:calc(var(--pad) * -1) calc(var(--pad) * -1) 0;padding:var(--pad) var(--pad) calc(var(--pad) * .8)}
+.v0 .hd{background:var(--p);color:var(--onp)}
+.v0 .title{color:inherit}
+.v0 .eyebrow span{background:var(--paper);color:var(--pd)}
+.v2 .hd{background:var(--ps)}
+.v1::before{content:"";position:absolute;inset:3cqmin;border:.8cqmin solid var(--p);border-radius:calc(var(--r) * 3cqmin);z-index:2;pointer-events:none}
+.v1 .inner{padding:calc(var(--pad) + 3cqmin)}
+.v1 .hd{text-align:center}
+.v1 .ft-full{margin:0;padding:1em 0 0;background:none;color:var(--ink);border-top:.12em solid var(--pt)}
+.v1 .ft-full .shop-name{color:var(--pd)}
+.v1 .c-flyer .points li{background:var(--ps)}
+
+/* 雰囲気: やさしい */
+.m-gentle .d1{width:40cqmin;aspect-ratio:1;border-radius:50%;background:var(--pt);opacity:.55;right:-13cqmin;bottom:-12cqmin}
+.m-gentle .d2{width:18cqmin;aspect-ratio:1;border-radius:50%;background:var(--a);opacity:.35;left:-7cqmin;bottom:22cqmin}
+.m-gentle .d3{width:26cqmin;height:14cqmin;right:5cqmin;top:4cqmin;background:radial-gradient(circle,var(--pt) 22%,transparent 25%) 0 0/3.5cqmin 3.5cqmin;opacity:.8}
+.m-gentle.v0 .hd::after,.m-gentle.v2 .hd::after{content:"";position:absolute;left:0;right:0;bottom:-1.9cqmin;height:2cqmin;
+  background:radial-gradient(circle at 50% 0,var(--hdbg) 1.9cqmin,transparent calc(1.9cqmin + .5px)) 0 0/4cqmin 2cqmin repeat-x}
+.m-gentle.v0{--hdbg:var(--p)} .m-gentle.v2{--hdbg:var(--ps)}
+.m-gentle.v0 .d3{display:none}
+
+/* 雰囲気: 清潔・信頼 */
+.m-trust .d1{right:0;bottom:0;width:34cqmin;height:34cqmin;background:linear-gradient(135deg,transparent 50%,var(--ps) 50%)}
+.m-trust .d2{left:0;right:0;top:0;height:1.6cqmin;background:var(--p)}
+.m-trust.v1 .d2{display:none}
+.m-trust .mk{border-radius:.18em}
+.m-trust .c-notice .points,.m-trust.c-notice .points{border:.12em solid var(--pt)}
+.m-trust .price{border:.14em solid var(--price);padding:.3em .7em;background:var(--paper)}
+.m-trust .price .pn{text-align:right}
+
+/* 雰囲気: 和・漢方 */
+.m-wa .d1{left:0;right:0;bottom:0;height:13cqmin;background:var(--seigaiha) 0 0/8cqmin 4cqmin;opacity:.9}
+.m-wa.v1::before{border-style:double;border-width:1.5cqmin;border-color:var(--pd)}
+.m-wa .title{letter-spacing:.08em;color:var(--ink)}
+.m-wa.v0 .title{color:inherit}
+.m-wa .eyebrow span,.m-wa.v0 .eyebrow span{background:none;border:.12em solid currentColor;color:var(--price);border-radius:0;letter-spacing:.2em;padding:.15em .8em}
+.m-wa.v0 .eyebrow span{color:var(--onp)}
+.m-wa .mk{width:.6em;height:.6em;margin:.55em .3em 0;border-radius:0;transform:rotate(45deg);background:var(--a)}
+.m-wa .mk::after{display:none}
+.m-wa .c-flyer .points li,.m-wa.c-flyer .points li{background:var(--paper);border:.1em solid var(--pt)}
+.m-wa .sub{color:var(--pd)}
+
+/* 雰囲気: 元気・にぎやか */
+.m-pop .d1{left:0;right:0;bottom:0;height:30cqmin;background:radial-gradient(circle,var(--pt) 18%,transparent 21%) 0 0/5cqmin 5cqmin;opacity:.75}
+.m-pop.v0 .hd{background:repeating-linear-gradient(-45deg,var(--p) 0 3cqmin,var(--p2) 3cqmin 6cqmin)}
+.m-pop.v2 .hd{background:var(--a)}
+.m-pop.v2 .title{color:var(--ink)}
+.m-pop.v2 .eyebrow span{background:var(--ink);color:var(--paper)}
+.m-pop .eyebrow span{transform:rotate(-3deg);font-weight:900;box-shadow:.18em .18em 0 var(--ink);color:var(--ink);background:var(--a)}
+.m-pop.v0 .eyebrow span{background:var(--a);color:var(--ink)}
+.m-pop .mk{background:var(--a)}
+.m-pop .mk::after{border-color:var(--ink)}
+.m-pop .c-flyer .points li,.m-pop.c-flyer .points li{background:var(--paper);border:.14em solid var(--ink);box-shadow:.25em .25em 0 var(--p)}
+.m-pop .price{width:13em;aspect-ratio:1;clip-path:var(--star);background:var(--price);color:#fff;flex-direction:column;flex-wrap:nowrap;align-items:center;justify-content:center;gap:.1em;transform:rotate(-6deg)}
+.m-pop .price .num{font-size:calc(min(3.3, 15 / var(--len)) * 1em)}
+.m-pop .price .tax{margin:0;font-size:.85em}
+.m-pop .price .yen{font-size:1.1em}
+.m-pop .price .pn{flex-basis:auto;color:#fff;text-align:center;font-size:.55em;margin-top:.2em}
+.m-pop .title{letter-spacing:.01em}
+
+/* 雰囲気: 上質・モダン */
+.m-modern .d1{width:72cqmin;aspect-ratio:1;border-radius:50%;background:var(--ps);right:-32cqmin;top:20%}
+.m-modern .title{color:var(--ink);letter-spacing:.06em}
+.m-modern.v0 .title{color:inherit}
+.m-modern .eyebrow span,.m-modern.v0 .eyebrow span{background:none;padding:0;color:var(--p);letter-spacing:.3em;font-size:.85em;display:inline-flex;align-items:center;gap:.8em}
+.m-modern.v0 .eyebrow span{color:var(--onp)}
+.m-modern .eyebrow span::before{content:"";width:2.4em;height:.08em;background:currentColor}
+.m-modern.v1 .eyebrow span::after{content:"";width:2.4em;height:.08em;background:currentColor}
+.m-modern .mk{width:1em;height:.1em;margin-top:.8em;border-radius:0}
+.m-modern .mk::after{display:none}
+.m-modern .c-notice .points,.m-modern.c-notice .points{background:none;border-top:.08em solid var(--ink);border-bottom:.08em solid var(--ink);border-radius:0;padding:1em 0}
+.m-modern .c-flyer .points li,.m-modern.c-flyer .points li{background:none;border-top:.1em solid var(--p);border-radius:0;padding:.7em 0 0}
+.m-modern .price{color:var(--ink);font-weight:700;border-top:.06em solid var(--ink);padding-top:.25em}
+.m-modern .ft-full{background:var(--ink)}
+.m-modern.v1 .ft-full{background:none}
+.m-modern .sub{font-weight:500}
+
+.m-gentle .price{background:var(--price);color:#fff;padding:.45em 1em .5em;border-radius:1.5em}
+.m-gentle .price .pn{color:inherit}
+
+/* 棚札（A4を4等分・8等分した帯） */
+.shelf .deco{display:none}
+.shelf .inner{flex-direction:row;padding:0;gap:0;font-size:calc(var(--k) * 10.5cqh);line-height:1.3}
+.sl-cat{flex:none;min-width:24%;max-width:40%;display:flex;align-items:center;justify-content:center;padding:.4em .9em;background:var(--p);color:var(--onp);
+  font-family:var(--ft);font-weight:var(--tw);font-size:1.25em;line-height:1.25;text-align:center;word-break:auto-phrase}
+.sl-main{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:.15em;padding:.4em 1.1em}
+.sl-name{font-family:var(--ft);font-weight:var(--tw);font-size:2.2em;line-height:1.2;color:var(--ink);word-break:auto-phrase;letter-spacing:.02em}
+.sl-note{font-size:1.05em;font-weight:700;color:var(--pd)}
+.shelf.v1::before{inset:6cqh 1.6cqw;border-width:2.2cqh}
+.shelf.v1 .inner{flex-direction:column;justify-content:center;padding:0 5cqw}
+.shelf.v1 .sl-cat{align-self:flex-start;min-width:0;max-width:none;padding:.1em .8em;font-size:.9em;border-radius:calc(var(--r) * 1em)}
+.shelf.v1 .sl-main{flex:none;padding:.1em 0 0}
+.shelf.v2 .inner{flex-direction:column}
+.shelf.v2 .sl-cat{min-width:0;max-width:none;justify-content:flex-start;background:var(--ps);color:var(--pd);padding:.15em 1em;font-size:1.15em;border-bottom:.15em solid var(--p)}
+.shelf.v2 .sl-main{padding:.1em 1.1em .2em}
+.m-gentle.shelf.v0 .sl-cat{border-radius:0 2em 2em 0}
+.m-trust.shelf .sl-name{font-weight:700}
+.m-wa.shelf.v0 .sl-cat{background:var(--pd);color:#fff;letter-spacing:.15em}
+.m-wa.shelf.v2 .sl-cat{background:var(--seigaiha) 0 0/5cqh 2.5cqh,var(--paper);color:var(--pd)}
+.m-pop.shelf.v0 .sl-cat{background:repeating-linear-gradient(-45deg,var(--p) 0 3cqh,var(--p2) 3cqh 6cqh)}
+.m-pop.shelf.v2 .sl-cat{background:var(--a);color:var(--ink);border-color:var(--ink)}
+.m-modern.shelf.v0 .sl-cat{background:var(--ink);color:var(--paper)}
+.m-modern.shelf .sl-name{font-weight:700;letter-spacing:.05em}
+.shelf-page{background:#fff;display:grid;align-content:start;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.shelf-page > .sheet{outline:.25mm dashed #9aa5a1;outline-offset:-.12mm}
+#sheetWrap.multi{box-shadow:none;display:flex;flex-direction:column;gap:20px;align-items:center}
+.page-host{position:relative;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.08),0 16px 40px rgba(20,40,30,.16)}
+.page-host > .shelf-page{position:absolute;left:0;top:0;transform-origin:0 0}
+.stage-inner.scroll{overflow-y:auto;place-items:start center}
+
+/* 棚札の入力欄 */
+.shelf-tools{display:flex;gap:6px;flex-wrap:wrap}
+.srows{display:flex;flex-direction:column;gap:8px}
+.srow{border:1px solid var(--line);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:6px;background:#fbfcfb}
+.srow.off{opacity:.55}
+.srow-top{display:flex;gap:6px;align-items:center}
+.srow input[type=text],.srow input[type=number]{border:1px solid var(--line);border-radius:6px;padding:5px 8px;background:#fff;min-width:0;width:100%}
+.srow input[type=number]{width:52px;flex:none;font-variant-numeric:tabular-nums}
+.srow input:focus{border-color:var(--ua);outline:none}
+.srow .cnt{font-size:12px;color:var(--muted);white-space:nowrap}
+.srow .del{border:0;background:none;color:var(--muted);cursor:pointer;font-size:12px;padding:4px;white-space:nowrap}
+.srow .del:hover{color:#a13d1f}
+.srow input[type=checkbox]{flex:none;width:16px;height:16px}
+#shelfBulk{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font-family:inherit;font-size:13px}
+
+/* 印刷 */
+#printArea{display:none}
+@media print{
+  html,body{background:#fff!important;height:auto}
+  #app,.modal,.toast{display:none!important}
+  #printArea{display:block}
+  .print-page{overflow:hidden;display:grid;place-content:center;break-after:page;page-break-after:always}
+  .print-page:last-child{break-after:auto;page-break-after:auto}
+  .print-page.shelf-page{place-content:start}
+  .imposed .sheet{outline:.2mm dashed #9aa5a1;outline-offset:-.1mm}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 6.2 L12 17.8" transform="rotate(-35 12 12) translate(0 0)" stroke="currentColor" stroke-width="1.8"/></svg>
+      薬局POPスタジオ
+    </div>
+    <button class="shop-chip" id="shopChip" type="button" title="店舗設定を変更"><i id="shopDot"></i><span id="shopName">店舗名</span><small>店舗設定</small></button>
+    <div class="top-actions">
+      <button class="btn" id="btnPdf" type="button">PDFで保存</button>
+      <button class="btn primary" id="btnPrint" type="button">印刷する</button>
+    </div>
+  </header>
+  <div class="banner" id="sampleBanner" hidden>
+    見本の店舗情報で表示しています。<button type="button" id="bannerSetup">薬局の情報を登録する</button>
+  </div>
+  <div class="work">
+    <aside class="side left">
+      <section>
+        <h2>つくるもの</h2>
+        <div class="seg" id="catTabs"></div>
+        <div class="tpl-list" id="tplList"></div>
+      </section>
+      <section>
+        <h2>用紙サイズ</h2>
+        <div class="size-grid" id="sizeList"></div>
+        <div class="seg" id="orientSeg">
+          <button type="button" data-o="portrait">縦</button>
+          <button type="button" data-o="landscape">横</button>
+        </div>
+        <label class="check" id="imposeWrap"><input type="checkbox" id="impose"><span id="imposeLabel">A4用紙に並べて印刷</span></label>
+      </section>
+      <section>
+        <h2>デザイン</h2>
+        <div class="mood-list" id="moodList"></div>
+        <div class="seg" id="variantSeg">
+          <button type="button" data-v="0">案A 帯</button>
+          <button type="button" data-v="1">案B 額縁</button>
+          <button type="button" data-v="2">案C 色面</button>
+        </div>
+      </section>
+    </aside>
+    <main class="stage" id="stage">
+      <div class="stage-inner" id="stageInner"><div id="sheetWrap"></div></div>
+      <div class="stage-meta" id="stageMeta"></div>
+    </main>
+    <aside class="side right">
+      <section>
+        <h2>文面</h2>
+        <div id="lawNote"></div>
+        <div class="fields" id="formFields"></div>
+        <details class="more" id="moreFields"><summary>ほかの項目を追加する</summary><div class="fields" id="formMore"></div></details>
+        <button class="btn small ghost" id="btnReset" type="button">このテンプレートの文面を初期状態に戻す</button>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<div id="printArea"></div>
+
+<!-- 店舗設定 -->
+<div class="modal" id="wizard" hidden>
+  <form class="modal-card" id="wizForm" autocomplete="off">
+    <div class="wiz-form">
+      <div>
+        <h1 id="wizTitle">薬局の情報を登録</h1>
+        <p class="lead">ここで登録した内容から、掲示物・POP・チラシの色・書体・飾りを自動で決めます。あとからいつでも変更できます。</p>
+      </div>
+      <div class="wiz-step">
+        <h3><em>1</em>薬局名</h3>
+        <div class="wiz-grid">
+          <div class="field full"><label for="s-name">薬局名<span class="req">必須</span></label><input type="text" id="s-name" placeholder="例：みどり薬局 駅前店" required></div>
+          <div class="field full"><label for="s-tagline">ひとことキャッチコピー</label><input type="text" id="s-tagline" placeholder="例：からだのこと、気軽に相談できる薬局です"><span class="hint">チラシの見出しや店名の下に入ります（空欄でも大丈夫です）</span></div>
+        </div>
+      </div>
+      <div class="wiz-step">
+        <h3><em>2</em>テーマ色<small>看板やロゴの色に近いものを選んでください</small></h3>
+        <div class="swatches" id="swatches"></div>
+      </div>
+      <div class="wiz-step">
+        <h3><em>3</em>お店の特徴<small>いくつでも選べます。チラシの文面やバッジに使います</small></h3>
+        <div class="chips" id="featureChips"></div>
+      </div>
+      <div class="wiz-step">
+        <h3><em>4</em>お店の雰囲気</h3>
+        <div class="moods" id="moodChoices"></div>
+      </div>
+      <div class="wiz-step">
+        <h3><em>5</em>店舗情報<small>チラシや掲示物の下部に入ります</small></h3>
+        <div class="wiz-grid">
+          <div class="field full"><label for="s-address">住所</label><input type="text" id="s-address" placeholder="例：東京都○○区△△ 1-2-3"></div>
+          <div class="field"><label for="s-tel">電話番号</label><input type="text" id="s-tel" placeholder="例：03-1234-5678"></div>
+          <div class="field"><label for="s-holiday">定休日</label><input type="text" id="s-holiday" placeholder="例：日曜・祝日"></div>
+          <div class="field full"><label for="s-hours">営業時間</label><textarea id="s-hours" rows="2" placeholder="例：月〜金 9:00〜19:00&#10;土 9:00〜13:00"></textarea></div>
+          <div class="field full"><span class="lbl">ロゴ画像（任意）</span>
+            <div class="img-field"><img id="logoThumb" alt="" hidden><input type="file" id="s-logo" accept="image/*"><button type="button" class="btn small ghost" id="logoClear" hidden>ロゴを外す</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="wiz-actions">
+        <div class="grp">
+          <button type="button" class="btn small ghost" id="btnExport">設定をファイルに書き出す</button>
+          <label class="btn small ghost" for="importFile">設定ファイルを読み込む</label>
+          <input type="file" id="importFile" accept="application/json,.json" hidden>
+        </div>
+        <div class="grp">
+          <button type="button" class="btn" id="wizCancel">閉じる</button>
+          <button type="submit" class="btn primary">この内容でデザインをつくる</button>
+        </div>
+      </div>
+    </div>
+    <div class="wiz-preview">
+      <h4>仕上がりイメージ</h4>
+      <div class="pv" id="wizPv"></div>
+      <p id="wizMoodNote"></p>
+    </div>
+  </form>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+'use strict';
+/* ---------------- データ定義 ---------------- */
+const SIZES = {A3:[297,420],B4:[257,364],A4:[210,297],B5:[182,257],A5:[148,210],A6:[105,148],postcard:[100,148]};
+const SIZE_LABEL = {A3:'A3',B4:'B4',A4:'A4',B5:'B5',A5:'A5',A6:'A6',postcard:'はがき'};
+
+const MOODS = {
+  gentle:{name:'やさしい・親しみやすい',short:'やさしい',desc:'丸ゴシックとやわらかな色',ft:"'Zen Maru Gothic'",fb:"'Zen Maru Gothic'",tw:900,r:1,variant:2,serif:false},
+  trust:{name:'清潔・信頼',short:'清潔・信頼',desc:'読みやすいUDフォントとすっきりした配置',ft:"'BIZ UDPGothic'",fb:"'BIZ UDPGothic'",tw:700,r:.25,variant:0,serif:false},
+  wa:{name:'和・漢方',short:'和・漢方',desc:'明朝体と和紙色、青海波の文様',ft:"'Shippori Mincho'",fb:"'Shippori Mincho'",tw:800,r:0,variant:1,serif:true},
+  pop:{name:'元気・にぎやか',short:'元気',desc:'太い丸ゴシックと目立つ値札',ft:"'M PLUS Rounded 1c'",fb:"'M PLUS Rounded 1c'",tw:900,r:.6,variant:0,serif:false},
+  modern:{name:'上質・モダン',short:'モダン',desc:'余白を生かした落ち着いた構成',ft:"'Zen Kaku Gothic New'",fb:"'Zen Kaku Gothic New'",tw:700,r:0,variant:2,serif:false},
+};
+const SANS_FB = ",'Hiragino Sans','Yu Gothic','Meiryo',sans-serif";
+const SERIF_FB = ",'Hiragino Mincho ProN','Yu Mincho',serif";
+
+const COLORS = [
+  ['若葉グリーン','#2f8f5b'],['ミントティール','#1f9590'],['スカイブルー','#2f7fc1'],['藍','#2c4a7a'],
+  ['さくら','#d9668a'],['オレンジ','#e9822a'],['えんじ','#a5373f'],['ラベンダー','#7a5aa6'],['からし','#c49a1c'],['チャコール','#3d4547'],
+];
+
+const FEATURES = [
+  {id:'kakari',label:'かかりつけ薬剤師',point:'かかりつけ薬剤師が、お薬をまとめて管理します',mood:'trust'},
+  {id:'zaitaku',label:'在宅医療・訪問',point:'ご自宅や施設へ、薬剤師がお薬をお届けします',mood:'trust'},
+  {id:'h24',label:'24時間電話相談',point:'夜間・休日もお電話でご相談いただけます',mood:'trust'},
+  {id:'kenko',label:'健康サポート薬局',point:'健康のことを気軽に相談できる「健康サポート薬局」です',mood:'trust'},
+  {id:'denshi',label:'電子処方箋・マイナ保険証',point:'電子処方箋・マイナ保険証に対応しています',mood:'modern'},
+  {id:'kanpo',label:'漢方相談',point:'体質に合わせた漢方のご相談を承ります',mood:'wa'},
+  {id:'kids',label:'キッズスペース',point:'お子さま連れでも安心のキッズスペースがあります',mood:'gentle'},
+  {id:'barrier',label:'バリアフリー',point:'段差のない店内で、車いすでもご来局いただけます',mood:'gentle'},
+  {id:'eiyou',label:'管理栄養士在籍',point:'管理栄養士が食事のご相談にのります',mood:'gentle'},
+  {id:'otc',label:'市販薬・日用品が充実',point:'市販薬や日用品もまとめてお買い求めいただけます',mood:'pop'},
+  {id:'cosme',label:'化粧品・美容相談',point:'敏感肌向けのスキンケアもご相談ください',mood:'modern'},
+  {id:'parking',label:'駐車場あり',point:'駐車場があり、お車でも便利です',mood:null},
+];
+
+const FIELD_DEF = {
+  risk:{label:'リスク区分',type:'select',options:['','要指導医薬品','第1類医薬品','指定第2類医薬品','第2類医薬品','第3類医薬品'],hint:'一般用医薬品のPOPに表示します'},
+  eyebrow:{label:'見出しラベル',type:'text'},
+  title:{label:'タイトル',type:'textarea',rows:2,hint:'改行すると、その位置で行が分かれます'},
+  sub:{label:'サブタイトル',type:'textarea',rows:2},
+  body:{label:'本文',type:'textarea',rows:4},
+  date:{label:'日付・期間',type:'text'},
+  points:{label:'ポイント（1行に1項目）',type:'textarea',rows:4},
+  price:{label:'価格（数字）',type:'text',hint:'例：1,480'},
+  tax:{label:'税表示',type:'select',options:['税込','税抜','']},
+  priceNote:{label:'価格の補足',type:'text',hint:'例：本体価格 1,346円'},
+  image:{label:'写真・画像',type:'image'},
+  note:{label:'注意書き（※）',type:'textarea',rows:2},
+  sign:{label:'署名',type:'text'},
+};
+const FIELD_ORDER = ['risk','eyebrow','title','sub','body','date','points','price','tax','priceNote','image','note','sign'];
+
+const CATS = {notice:'掲示物',pop:'店頭POP',flyer:'チラシ',shelf:'棚札'};
+const CAT_SIZE = {notice:'A4',pop:'A5',flyer:'A4',shelf:'A4'};
+// 棚札はA4縦を横に等分した帯。1ページあたりの枚数で高さが決まる
+const SHELF_SIZES = {
+  quarter:{label:'A4の1/4帯',short:'1/4帯',per:4},
+  slim:{label:'細帯（A4の1/8）',short:'細帯',per:8},
+};
+const SHELF_SAMPLE = [
+  ['かぜ薬','総合かぜ薬（錠剤・顆粒）','第2類医薬品'],['胃腸薬','胃腸薬・整腸薬',''],['目薬','疲れ目・かすみ目の目薬',''],
+  ['鼻炎薬','鼻炎・花粉症のお薬',''],['湿布・外用薬','肩・腰の湿布',''],['衛生用品','マスク・消毒液',''],
+  ['ベビー用品','おしりふき・ベビーケア',''],['健康食品','減塩食品・栄養補助食品',''],
+].map(([cat,name,note])=>({cat,name,note,n:1,on:true}));
+
+const TEMPLATES = [
+  {id:'notice-hours',cat:'notice',name:'営業時間変更のお知らせ',desc:'受付時間・営業日の変更',dateLabel:'変更日',
+   fields:['eyebrow','title','body','date','points','note','sign'],
+   d:s=>({eyebrow:'お知らせ',title:'営業時間変更のお知らせ',body:`いつも${s.name}をご利用いただき、誠にありがとうございます。\n下記のとおり営業時間を変更いたします。ご理解とご協力をお願い申し上げます。`,date:'2026年11月1日（日）から',points:'月〜金　9:00〜19:00\n土曜日　9:00〜13:00\n日曜日・祝日　休み',note:'処方箋の最終受付は、閉店の15分前までとなります。',sign:'薬剤師・スタッフ一同'})},
+  {id:'notice-holiday',cat:'notice',name:'年末年始休業のお知らせ',desc:'長期休業・臨時休業',dateLabel:'休業期間',
+   fields:['eyebrow','title','body','date','points','note','sign'],
+   d:s=>({eyebrow:'お知らせ',title:'年末年始休業のお知らせ',body:'誠に勝手ながら、下記の期間を休業とさせていただきます。\nお薬が切れることのないよう、お早めにご来局ください。',date:'12月29日（火）〜 1月3日（日）',points:'1月4日（月）9:00から通常どおり営業いたします',note:'休業中に急に具合が悪くなったときは、地域の休日当番薬局や救急医療機関をご利用ください。',sign:'薬剤師・スタッフ一同'})},
+  {id:'notice-myna',cat:'notice',name:'マイナ保険証のご案内',desc:'窓口での利用方法',
+   fields:['eyebrow','title','sub','points','note','image'],
+   d:s=>({eyebrow:'ご案内',title:'マイナ保険証が\nご利用いただけます',sub:'受付のカードリーダーに、カードを置くだけです',points:'これまでのお薬の情報をもとに、より安全にお薬をお渡しできます\n限度額適用認定証がなくても、窓口での支払いが自己負担限度額までになります\n確定申告の医療費控除の手続きがかんたんになります',note:'保険証としての利用登録がまだの方も、カードリーダーで登録できます。わからないことはスタッフにお声がけください。'})},
+  {id:'notice-generic',cat:'notice',name:'ジェネリック医薬品のご案内',desc:'後発医薬品への切り替え',
+   fields:['eyebrow','title','sub','body','points','note'],
+   d:s=>({eyebrow:'ご案内',title:'ジェネリック医薬品を\nご希望の方へ',sub:'お薬代の負担を軽くできる場合があります',body:'ジェネリック医薬品（後発医薬品）は、先発医薬品と同じ有効成分を同じ量含み、国の審査を経て承認されたお薬です。',points:'ご希望の方は、処方箋をお出しになるときにお申し出ください\n切り替えたあとで、もとのお薬に戻すこともできます\n味や大きさの違いなど、気になることは薬剤師にご相談ください'})},
+  {id:'notice-techo',cat:'notice',name:'お薬手帳のお願い',desc:'持参・一冊化の呼びかけ',
+   fields:['eyebrow','title','sub','points','note'],
+   d:s=>({eyebrow:'お願い',title:'お薬手帳を\nお持ちください',sub:'飲み合わせやアレルギーの確認に役立ちます',points:'いくつかの病院にかかっている方も、手帳は1冊にまとめましょう\n市販薬やサプリメントも書いておくと安心です\nスマートフォンの電子お薬手帳もご利用いただけます',note:'災害のときも、ふだん飲んでいるお薬を正確に伝える手がかりになります。'})},
+  {id:'notice-infection',cat:'notice',name:'感染対策のお願い',desc:'発熱・せきのある方へ',
+   fields:['eyebrow','title','points','note','sign'],
+   d:s=>({eyebrow:'ご来局の皆さまへ',title:'感染対策への\nご協力のお願い',points:'発熱やせきのある方は、入口でスタッフにお声がけください\nお車の中でお待ちいただくこともできます\n手指の消毒にご協力ください',note:'お薬のお渡しの方法については、お電話でもご相談いただけます。',sign:'薬剤師・スタッフ一同'})},
+  {id:'pop-price',cat:'pop',name:'商品POP（価格つき）',desc:'棚・レジ横の値札',law:true,
+   fields:['risk','eyebrow','title','sub','points','price','tax','priceNote','image','note'],
+   d:s=>({risk:'第2類医薬品',eyebrow:'薬剤師のおすすめ',title:'かぜ薬（顆粒）',sub:'12包入・1日3回',points:'ご家族の年齢や体質に合わせて選べます\n錠剤タイプもございます',price:'1,480',tax:'税込',priceNote:'本体価格 1,346円',note:'使用上の注意をよく読んでお使いください。ご相談は薬剤師・登録販売者まで。'})},
+  {id:'pop-staff',cat:'pop',name:'スタッフおすすめPOP',desc:'手書き風コメントつき',law:true,
+   fields:['eyebrow','title','body','sign','price','tax','image'],
+   d:s=>({eyebrow:'スタッフのおすすめ',title:'減塩のおみそ汁\nフリーズドライ5食',body:'だしの風味がしっかりしていて、減塩でも満足感があります。忙しい朝にもおすすめです。',sign:'管理栄養士　山田',price:'498',tax:'税込'})},
+  {id:'pop-season',cat:'pop',name:'季節のコーナーPOP',desc:'花粉症・熱中症など',law:true,
+   fields:['eyebrow','title','sub','points','image'],
+   d:s=>({eyebrow:'今年も花粉の季節です',title:'花粉症対策\nコーナー',points:'目のかゆみや鼻水のお悩みは、薬剤師にご相談ください\n眠くなりにくいタイプのお薬もございます\nマスク・メガネ・保湿ティッシュもこちらです'})},
+  {id:'flyer-shop',cat:'flyer',name:'店舗紹介チラシ',desc:'特徴から文面を自動作成',
+   fields:['eyebrow','title','sub','points','body','image','note'],
+   d:s=>{
+     const pts = (s.features||[]).map(id=>FEATURES.find(f=>f.id===id)).filter(Boolean).map(f=>f.point).slice(0,6);
+     return {eyebrow:'どこの病院の処方箋も受け付けています',title:s.tagline||'からだのこと、\n気軽に相談できる薬局です',sub:`${s.name}は、地域の皆さまのかかりつけ薬局です`,
+       points:(pts.length?pts:['どこの医療機関の処方箋も受け付けています','待ち時間にお薬のご相談ができます','市販薬・介護用品もそろえています']).join('\n'),
+       body:'お薬のこと、市販薬の選び方、介護や食事のことまで。気になることがあれば、いつでも薬剤師にお声がけください。'};
+   }},
+  {id:'flyer-event',cat:'flyer',name:'健康イベントのチラシ',desc:'測定会・相談会の告知',dateLabel:'日時',
+   fields:['eyebrow','title','sub','date','points','body','note','image'],
+   d:s=>({eyebrow:'参加無料・予約不要',title:'からだ測定会',sub:'血圧・骨の健康度・体組成を測ってみませんか',date:'11月14日（土）10:00〜15:00',points:'血圧測定\n骨の健康度チェック（かかとで測定）\n薬剤師・管理栄養士の健康相談',body:`会場は${s.name}の店内です。お買い物のついでに、お気軽にお立ち寄りください。`,note:'測定結果は医師の診断に代わるものではありません。'})},
+  {id:'flyer-home',cat:'flyer',name:'在宅医療のご案内',desc:'訪問薬剤管理の紹介',
+   fields:['eyebrow','title','sub','points','note','image'],
+   d:s=>({eyebrow:'在宅医療のご案内',title:'通院がむずかしい方へ\n薬剤師がご自宅に伺います',sub:'ご本人・ご家族・ケアマネジャーの方からのご相談を受け付けています',points:'お薬をご自宅や施設までお届けします\n飲み忘れや飲み残しを一緒に整理します\n医師やケアマネジャーと連携します\n医療保険・介護保険が使えます',note:'費用は保険の種類や自己負担の割合によって異なります。お気軽にお問い合わせください。'})},
+  {id:'shelf-tag',cat:'shelf',name:'棚札',desc:'カテゴリ名と商品名をまとめて印刷',fields:[],d:s=>({})},
+];
+const TPL = Object.fromEntries(TEMPLATES.map(t=>[t.id,t]));
+
+const SAMPLE_SHOP = {name:'みどり薬局 駅前店',tagline:'',color:'#2f8f5b',features:['kakari','zaitaku','kids','parking'],mood:'auto',
+  address:'東京都○○区△△ 1-2-3',tel:'03-1234-5678',hours:'月〜金 9:00〜19:00\n土 9:00〜13:00',holiday:'日曜・祝日',logo:''};
+
+/* ---------------- 色のユーティリティ ---------------- */
+function hexToRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return[(n>>16)&255,(n>>8)&255,n&255]}
+function rgbToHsl([r,g,b]){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,s=0;const l=(mx+mn)/2;
+  if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h*=60}return[h,s*100,l*100]}
+function hsl(h,s,l){h=((h%360)+360)%360;s=Math.max(0,Math.min(100,s))/100;l=Math.max(0,Math.min(100,l))/100;
+  const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+  return '#'+[f(0),f(8),f(4)].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('')}
+function lum(hex){return hexToRgb(hex).map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0)}
+function contrast(a,b){const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
+function onColor(bg,ink){return contrast(bg,'#ffffff')>=contrast(bg,ink)*0.82?'#ffffff':ink}
+
+function makeTheme(color,mood){
+  const [h,s,l]=rgbToHsl(hexToRgb(color));
+  const sc=Math.min(s,75);
+  const t={p:color};
+  t.pd=hsl(h,Math.min(s,65),Math.min(Math.max(l-20,20),33));
+  t.pt=hsl(h,sc*.7,84);
+  t.ps=hsl(h,sc*.6,95);
+  t.ink=hsl(h,18,15);
+  t.paper='#ffffff';
+  t.p2=hsl(h,s,Math.max(l-7,10));
+  const redHue=h<18||h>335;
+  t.price=redHue?t.pd:'#cf2f36';
+  if(mood==='gentle'){t.a=hsl(h+35,70,74);t.paper=hsl(h,35,98.6)}
+  else if(mood==='trust'){t.a=hsl(46,95,62)}
+  else if(mood==='wa'){t.a=hsl(38,52,46);t.paper='#f8f4ea';t.price=redHue?t.pd:'#ad3b28';t.ink='#24201b'}
+  else if(mood==='pop'){t.a=(h>30&&h<75)?hsl(h+190,70,58):hsl(48,100,58)}
+  else {t.a=hsl(h,25,55);t.paper=hsl(h,12,98.6)}
+  if(s<12){t.pt=hsl(h,0,84);t.ps=hsl(h,0,95)}
+  t.onp=onColor(t.p,t.ink);
+  t.ona=onColor(t.a,t.ink);
+  return t;
+}
+function seigaiha(stroke,fill){
+  const rings=c=>[19,14,9,4].map((r,i)=>`<circle cx='${c[0]}' cy='${c[1]}' r='${r}' fill='${i===0?fill:'none'}' stroke='${stroke}' stroke-width='1.3'/>`).join('');
+  const svg=`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'>${[[0,0],[40,0],[20,10],[0,20],[40,20]].map(rings).join('')}</svg>`;
+  return 'data:image/svg+xml,'+encodeURIComponent(svg);
+}
+const STAR=(()=>{const n=18,p=[];for(let i=0;i<n*2;i++){const r=i%2?41:50,a=Math.PI*i/n-Math.PI/2;p.push(`${(50+r*Math.cos(a)).toFixed(2)}% ${(50+r*Math.sin(a)).toFixed(2)}%`)}return`polygon(${p.join(',')})`})();
+
+/* ---------------- 状態と保存 ---------------- */
+const KEY='pharmacy-pop-studio.v1';
+let state=load();
+function load(){
+  try{const raw=localStorage.getItem(KEY);if(raw){const s=JSON.parse(raw);if(s&&s.shop)return normalize(s)}}catch(e){}
+  return normalize({shop:{...SAMPLE_SHOP},isSample:true});
+}
+function normalize(s){
+  s.docs=s.docs||{};
+  s.cur=Object.assign({cat:'flyer',tpl:'flyer-shop',size:'A4',orient:'portrait',variant:null,mood:null,impose:true},s.cur||{});
+  if(!TPL[s.cur.tpl])s.cur.tpl='flyer-shop';
+  s.shop=Object.assign({...SAMPLE_SHOP,features:[]},s.shop);
+  s.shelf=Object.assign({size:'quarter',items:SHELF_SAMPLE.map(x=>({...x}))},s.shelf||{});
+  if(!SHELF_SIZES[s.shelf.size])s.shelf.size='quarter';
+  return s;
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(state));return true}
+  catch(e){
+    if(e&&(e.name==='QuotaExceededError'||e.code===22))toast('ブラウザに保存できませんでした。画像が大きすぎる可能性があります。');
+    return false;
+  }
+}
+
+function resolveMood(shop){
+  if(shop.mood&&shop.mood!=='auto'&&MOODS[shop.mood])return shop.mood;
+  const tally={};
+  (shop.features||[]).forEach(id=>{const f=FEATURES.find(x=>x.id===id);if(f&&f.mood)tally[f.mood]=(tally[f.mood]||0)+1});
+  if(tally.wa)return 'wa';
+  const best=Object.entries(tally).sort((a,b)=>b[1]-a[1])[0];
+  return best?best[0]:'trust';
+}
+function curMood(){return state.cur.mood||resolveMood(state.shop)}
+function curVariant(){const m=curMood();return state.cur.variant==null?MOODS[m].variant:state.cur.variant}
+function fieldsFor(tplId,shop){return Object.assign({},TPL[tplId].d(shop),(state.docs[tplId]||{}))}
+
+/* ---------------- ポスター生成 ---------------- */
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const br=s=>esc(s).replace(/\n/g,'<br>');
+const lines=s=>String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
+
+function sheetDims(size,orient){const [w,h]=SIZES[size];return orient==='landscape'?[h,w]:[w,h]}
+
+function applyTheme(el,shop,mood,k){
+  const t=makeTheme(shop.color,mood), M=MOODS[mood], fb=M.serif?SERIF_FB:SANS_FB;
+  const vars={'--p':t.p,'--p2':t.p2,'--pd':t.pd,'--pt':t.pt,'--ps':t.ps,'--a':t.a,'--ona':t.ona,'--onp':t.onp,'--ink':t.ink,'--paper':t.paper,'--price':t.price,
+    '--ft':M.ft+fb,'--fb':M.fb+fb,'--tw':M.tw,'--r':M.r,'--k':k,'--star':STAR};
+  if(mood==='wa')vars['--seigaiha']=`url("${seigaiha(t.pt,t.paper)}")`;
+  for(const[a,b]of Object.entries(vars))el.style.setProperty(a,b);
+}
+
+// 棚札1枚
+function buildShelfLabel({shop,item,h,mood,variant}){
+  const el=document.createElement('div');
+  el.className=`sheet shelf m-${mood} v${variant}`;
+  el.style.width='210mm';el.style.height=h+'mm';
+  applyTheme(el,shop,mood,1);
+  el.innerHTML=`<div class="deco"></div><div class="inner">`+
+    (String(item.cat||'').trim()?`<div class="sl-cat">${br(item.cat)}</div>`:'')+
+    `<div class="sl-main"><div class="sl-name">${br(item.name||'')}</div>${String(item.note||'').trim()?`<div class="sl-note">${esc(item.note)}</div>`:''}</div></div>`;
+  return el;
+}
+// 印刷対象の棚札を枚数ぶん展開し、A4ごとに分ける
+function shelfPages(){
+  const S=SHELF_SIZES[state.shelf.size], list=[];
+  state.shelf.items.forEach(it=>{if(it.on&&(String(it.name||'').trim()||String(it.cat||'').trim())){for(let i=0;i<Math.max(1,Math.min(99,+it.n||1));i++)list.push(it)}});
+  const pages=[];for(let i=0;i<list.length;i+=S.per)pages.push(list.slice(i,i+S.per));
+  return {pages,total:list.length,per:S.per,h:297/S.per};
+}
+
+function buildSheet({shop,tpl,f,size,orient,mood,variant,k=1}){
+  const [w,h]=sheetDims(size,orient);
+  const el=document.createElement('div');
+  el.className=`sheet m-${mood} v${variant} c-${tpl.cat} ${orient==='landscape'?'land':'port'}${f.image?' has-photo':''}`;
+  el.style.width=w+'mm';el.style.height=h+'mm';
+  applyTheme(el,shop,mood,k);
+
+  const logo=shop.logo?`<img class="logo" src="${shop.logo}" alt="">`:'';
+  let hd='';
+  if(f.risk)hd+=`<div class="risk">${esc(f.risk)}</div>`;
+  if(f.eyebrow)hd+=`<div class="eyebrow"><span>${br(f.eyebrow)}</span></div>`;
+  hd+=`<h1 class="title">${br(f.title||'')}</h1>`;
+  if(f.sub)hd+=`<p class="sub">${br(f.sub)}</p>`;
+
+  let txt='';
+  if(f.body)txt+=`<p class="body${tpl.id==='pop-staff'?' comment':''}">${br(f.body)}</p>`;
+  if(f.date)txt+=`<div class="date"><b>${esc(tpl.dateLabel||'日時')}</b><span>${br(f.date)}</span></div>`;
+  const pts=lines(f.points);
+  if(pts.length)txt+=`<ul class="points">${pts.map(p=>`<li><i class="mk"></i><span>${esc(p)}</span></li>`).join('')}</ul>`;
+  if(f.note)txt+=`<p class="note">※ ${br(f.note)}</p>`;
+  if(f.sign)txt+=`<p class="sign">${esc(f.sign)}</p>`;
+
+  let price='';
+  if(String(f.price||'').trim()){
+    const len=Math.max(3,String(f.price).replace(/\s/g,'').length);
+    price=`<div class="price">${f.tax?`<span class="tax">${esc(f.tax)}</span>`:''}<span class="num" style="--len:${len}">${esc(f.price)}</span><span class="yen">円</span>${f.priceNote?`<span class="pn">${esc(f.priceNote)}</span>`:''}</div>`;
+  }
+
+  let ft;
+  if(tpl.cat==='flyer'){
+    const info=[['住所',shop.address],['電話',shop.tel],['営業時間',shop.hours],['定休日',shop.holiday]].filter(x=>String(x[1]||'').trim());
+    const badges=(shop.features||[]).map(id=>FEATURES.find(x=>x.id===id)).filter(Boolean);
+    ft=`<footer class="ft ft-full"><div class="ft-shop">${logo}<div><div class="shop-name">${esc(shop.name)}</div>${shop.tagline&&f.title!==shop.tagline?`<div class="tagline">${esc(shop.tagline)}</div>`:''}</div></div>`+
+      (info.length?`<dl>${info.map(([a,b])=>`<dt>${a}</dt><dd>${br(b)}</dd>`).join('')}</dl>`:'<div></div>')+
+      (badges.length?`<div class="badges">${badges.map(b=>`<span>${esc(b.label)}</span>`).join('')}</div>`:'')+`</footer>`;
+  }else{
+    ft=`<footer class="ft ft-simple"><span class="shop-name">${logo}${esc(shop.name)}</span>${tpl.cat==='notice'&&shop.tel?`<span class="tel">TEL ${esc(shop.tel)}</span>`:''}</footer>`;
+  }
+
+  el.innerHTML=`<div class="deco"><i class="d1"></i><i class="d2"></i><i class="d3"></i></div>`+
+    `<div class="inner"><header class="hd">${hd}</header><main class="bd">${f.image?`<figure class="photo"><img src="${f.image}" alt=""></figure>`:''}<div class="col"><div class="txt">${txt}</div>${price}</div></main>${ft}</div>`;
+  return el;
+}
+
+// 文字量が多いときに用紙に収まるまで縮小する
+function fit(sheet){
+  const inner=sheet.querySelector('.inner');
+  let k=1;sheet.style.setProperty('--k',k);
+  let g=0;
+  while((inner.scrollHeight>inner.clientHeight+1||inner.scrollWidth>inner.clientWidth+1)&&k>0.42&&g++<40){
+    k=Math.round((k-0.03)*1000)/1000;sheet.style.setProperty('--k',k);
+  }
+  const over=inner.scrollHeight>inner.clientHeight+1;
+  return {k,over};
+}
+const MM=96/25.4;
+function placeScaled(sheet,host,availW,availH,maxScale=1.6){
+  const pw=parseFloat(sheet.style.width)*MM, ph=parseFloat(sheet.style.height)*MM;
+  const s=Math.max(.05,Math.min(availW/pw,availH/ph,maxScale));
+  host.style.width=pw*s+'px';host.style.height=ph*s+'px';
+  sheet.style.transform=`scale(${s})`;
+  return s;
+}
+
+/* ---------------- 画面描画 ---------------- */
+const $=s=>document.querySelector(s);
+let lastFit={k:1,over:false};
+
+function applyUiColor(){
+  const c=state.shop.color, [h,s]=rgbToHsl(hexToRgb(c));
+  const r=document.documentElement.style;
+  r.setProperty('--ua',c);
+  r.setProperty('--ua-deep',hsl(h,Math.min(s,60),28));
+  r.setProperty('--ua-soft',hsl(h,Math.min(s,60)*.6,95));
+  $('#shopDot').style.background=c;
+  $('#shopName').textContent=state.shop.name;
+  $('#sampleBanner').hidden=!state.isSample;
+}
+
+function renderLeft(){
+  const c=state.cur;
+  $('#catTabs').innerHTML=Object.entries(CATS).map(([k,v])=>`<button type="button" data-cat="${k}" aria-pressed="${c.cat===k}">${v}</button>`).join('');
+  $('#tplList').innerHTML=TEMPLATES.filter(t=>t.cat===c.cat).map(t=>`<button type="button" data-tpl="${t.id}" aria-pressed="${c.tpl===t.id}"><b>${t.name}</b><small>${t.desc}</small></button>`).join('');
+  const isShelf=c.cat==='shelf';
+  $('#sizeList').style.gridTemplateColumns=isShelf?'1fr 1fr':'';
+  $('#sizeList').innerHTML=isShelf
+    ?Object.entries(SHELF_SIZES).map(([k,s])=>`<button type="button" data-shelfsize="${k}" aria-pressed="${state.shelf.size===k}"><b>${s.label}</b><small>210×${(297/s.per).toFixed(1)}mm・1枚に${s.per}枚</small></button>`).join('')
+    :Object.keys(SIZES).map(k=>`<button type="button" data-size="${k}" aria-pressed="${c.size===k}"><b>${SIZE_LABEL[k]}</b><small>${SIZES[k][0]}×${SIZES[k][1]}</small></button>`).join('');
+  $('#orientSeg').hidden=isShelf;
+  $('#imposeWrap').hidden=isShelf;
+  document.querySelectorAll('#orientSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.o===c.orient));
+  const imp=imposition();
+  $('#impose').checked=!!c.impose;$('#impose').disabled=!imp;
+  $('#imposeWrap').setAttribute('aria-disabled',!imp);
+  $('#imposeLabel').textContent=imp?`A4用紙に${imp.n}面ならべて印刷（切り取り線つき）`:'A4用紙に並べて印刷（A5以下のサイズで使えます）';
+  const auto=resolveMood(state.shop);
+  $('#moodList').innerHTML=`<button type="button" class="auto" data-mood="" aria-pressed="${!c.mood}"><b>店舗設定どおり</b><small>いまは「${MOODS[auto].name}」</small></button>`+
+    Object.entries(MOODS).map(([k,m])=>`<button type="button" data-mood="${k}" aria-pressed="${c.mood===k}"><span class="aa" style="font-family:${m.ft}${m.serif?SERIF_FB:SANS_FB};font-weight:${m.tw}">あ Aa</span><small>${m.short}</small></button>`).join('');
+  const v=curVariant();
+  document.querySelectorAll('#variantSeg button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.v===v));
+}
+
+function renderShelfForm(){
+  const rows=state.shelf.items.map((it,i)=>`<div class="srow${it.on?'':' off'}">
+    <div class="srow-top">
+      <input type="checkbox" id="sr-${i}-on" data-row="${i}" data-col="on"${it.on?' checked':''} title="印刷する" aria-label="${i+1}行目を印刷する">
+      <input type="text" id="sr-${i}-cat" data-row="${i}" data-col="cat" value="${esc(it.cat)}" placeholder="カテゴリ名" aria-label="カテゴリ名">
+      <input type="number" id="sr-${i}-n" data-row="${i}" data-col="n" value="${+it.n||1}" min="1" max="99" aria-label="枚数"><span class="cnt">枚</span>
+      <button type="button" class="del" data-shelf="del" data-i="${i}">削除</button>
+    </div>
+    <input type="text" id="sr-${i}-name" data-row="${i}" data-col="name" value="${esc(it.name)}" placeholder="商品名" aria-label="商品名">
+    <input type="text" id="sr-${i}-note" data-row="${i}" data-col="note" value="${esc(it.note)}" placeholder="補足（任意）例：第2類医薬品" aria-label="補足">
+  </div>`).join('');
+  $('#formFields').innerHTML=`
+    <div class="shelf-tools">
+      <button type="button" class="btn small" data-shelf="add">1行追加</button>
+      <button type="button" class="btn small ghost" data-shelf="all">すべて印刷する</button>
+      <button type="button" class="btn small ghost" data-shelf="none">すべて外す</button>
+    </div>
+    <span class="hint" style="font-size:11.5px;color:var(--muted)">チェックを入れた行だけ印刷します。枚数を増やすと同じ棚札を続けて並べます。</span>
+    <div class="srows">${rows||'<p class="hint">棚札がありません。「1行追加」から入力してください。</p>'}</div>
+    <details class="more"><summary>まとめて追加（Excelから貼り付け）</summary>
+      <div class="fields">
+        <div class="field"><label for="shelfBulk">1行に1枚。「カテゴリ名」「商品名」「補足」の順に、タブかカンマで区切ります</label>
+          <textarea id="shelfBulk" rows="6" placeholder="かぜ薬	総合かぜ薬（錠剤）	第2類医薬品&#10;胃腸薬,胃腸薬・整腸薬"></textarea>
+          <span class="hint">Excelで3列を選んでコピーし、そのまま貼り付けられます。1列だけのときは商品名として扱います</span></div>
+        <label class="check"><input type="checkbox" id="shelfReplace"><span>今の行をすべて置き換える</span></label>
+        <button type="button" class="btn small" data-shelf="bulk">貼り付けた内容を追加</button>
+      </div>
+    </details>`;
+}
+
+function renderForm(){
+  const isShelf=state.cur.cat==='shelf';
+  $('#moreFields').hidden=isShelf;$('#btnReset').hidden=isShelf;
+  if(isShelf){$('#lawNote').innerHTML='';$('#formMore').innerHTML='';renderShelfForm();return}
+  const tpl=TPL[state.cur.tpl], f=fieldsFor(tpl.id,state.shop);
+  const mk=key=>{
+    const d=FIELD_DEF[key], id='f-'+key, v=f[key]??'';
+    const hint=d.hint?`<span class="hint">${d.hint}</span>`:'';
+    let label=d.label;
+    if(key==='date'&&tpl.dateLabel)label=`${tpl.dateLabel}`;
+    if(d.type==='text')return`<div class="field"><label for="${id}">${label}</label><input type="text" id="${id}" data-key="${key}" value="${esc(v)}">${hint}</div>`;
+    if(d.type==='textarea')return`<div class="field"><label for="${id}">${label}</label><textarea id="${id}" data-key="${key}" rows="${d.rows}">${esc(v)}</textarea>${hint}</div>`;
+    if(d.type==='select')return`<div class="field"><label for="${id}">${label}</label><select id="${id}" data-key="${key}">${d.options.map(o=>`<option value="${o}"${o===v?' selected':''}>${o||'（表示しない）'}</option>`).join('')}</select>${hint}</div>`;
+    if(d.type==='image')return`<div class="field"><span class="lbl">${label}</span><div class="img-field">${v?`<img src="${v}" alt="">`:''}<input type="file" id="${id}" data-key="${key}" accept="image/*">${v?`<button type="button" class="btn small ghost" data-clear="${key}">画像を外す</button>`:''}</div><span class="hint">商品写真や店内の写真など。大きい画像は自動で縮小します</span></div>`;
+  };
+  const main=tpl.fields.slice().sort((a,b)=>FIELD_ORDER.indexOf(a)-FIELD_ORDER.indexOf(b));
+  const rest=FIELD_ORDER.filter(k=>!main.includes(k)&&!(k==='risk'&&tpl.cat!=='pop'));
+  $('#formFields').innerHTML=main.map(mk).join('');
+  $('#formMore').innerHTML=rest.map(mk).join('');
+  $('#lawNote').innerHTML=tpl.law?`<div class="law">医薬品・健康食品の表現は、薬機法と医薬品等適正広告基準に沿っているかご確認ください。効果を断定する表現や、ほかの商品をおとしめる表現は使えません。</div>`:'';
+}
+
+let rafId=0;
+function renderPreview(){
+  cancelAnimationFrame(rafId);
+  rafId=requestAnimationFrame(()=>{
+    const c=state.cur, tpl=TPL[c.tpl];
+    const wrap0=$('#sheetWrap'), multi=c.cat==='shelf';
+    wrap0.classList.toggle('multi',multi);$('#stageInner').classList.toggle('scroll',multi);
+    if(multi){renderShelfPreview();return}
+    const sheet=buildSheet({shop:state.shop,tpl,f:fieldsFor(tpl.id,state.shop),size:c.size,orient:c.orient,mood:curMood(),variant:curVariant()});
+    const wrap=$('#sheetWrap');wrap.replaceChildren(sheet);
+    lastFit=fit(sheet);
+    scalePreview();
+    const [w,h]=sheetDims(c.size,c.orient);
+    const pct=Math.round(lastFit.k*100);
+    $('#stageMeta').innerHTML=`<span>${SIZE_LABEL[c.size]} ${c.orient==='landscape'?'横':'縦'}（${w}×${h}mm）</span><span>${MOODS[curMood()].name}・案${'ABC'[curVariant()]}</span>`+
+      (lastFit.over?`<span class="warn">文字が多く、用紙に収まりません。文面を短くするか、大きい用紙を選んでください</span>`:pct<100?`<span>文字量に合わせて文字を${pct}%に縮小しています</span>`:'');
+  });
+}
+function renderShelfPreview(){
+  const {pages,total,per,h}=shelfPages(), mood=curMood(), variant=curVariant(), wrap=$('#sheetWrap');
+  wrap.style.width='';wrap.style.height='';
+  let over=0;
+  const hosts=pages.map(items=>{
+    const page=document.createElement('div');
+    page.className='shelf-page';
+    page.style.width='210mm';page.style.height='297mm';page.style.gridTemplateRows=`repeat(${per},${h}mm)`;
+    items.forEach(it=>page.appendChild(buildShelfLabel({shop:state.shop,item:it,h,mood,variant})));
+    const host=document.createElement('div');host.className='page-host';host.appendChild(page);
+    return host;
+  });
+  wrap.replaceChildren(...hosts);
+  wrap.querySelectorAll('.sheet').forEach(s=>{if(fit(s).over)over++});
+  scalePreview();
+  const S=SHELF_SIZES[state.shelf.size];
+  $('#stageMeta').innerHTML=total
+    ?`<span>${S.label}（210×${h.toFixed(1)}mm）</span><span>${total}枚・A4用紙${pages.length}ページ</span><span>${MOODS[mood].name}・案${'ABC'[variant]}</span>`+(over?`<span class="warn">${over}枚の文字が長すぎて収まりません</span>`:'')
+    :`<span class="warn">印刷する棚札がありません。右の一覧で商品名を入力し、チェックを入れてください</span>`;
+}
+
+function scalePreview(){
+  const box=$('#stageInner');
+  if(state.cur.cat==='shelf'){
+    document.querySelectorAll('#sheetWrap .page-host').forEach(host=>placeScaled(host.firstChild,host,box.clientWidth-48,box.clientHeight-48,1.2));
+    return;
+  }
+  const sheet=$('#sheetWrap .sheet');if(!sheet)return;
+  placeScaled(sheet,$('#sheetWrap'),box.clientWidth-48,box.clientHeight-48);
+}
+function renderAll(){applyUiColor();renderLeft();renderForm();renderPreview()}
+
+/* ---------------- 面付け・印刷 ---------------- */
+function imposition(){
+  const [w,h]=sheetDims(state.cur.size,state.cur.orient);
+  const opts=[[210,297],[297,210]].map(([W,H])=>{const c=Math.floor((W+.01)/w),r=Math.floor((H+.01)/h);return{W,H,c,r,n:c*r}});
+  const best=opts.sort((a,b)=>b.n-a.n)[0];
+  return best.n>=2?best:null;
+}
+function buildPrint(){
+  const c=state.cur, tpl=TPL[c.tpl];
+  if(c.cat==='shelf'){
+    // プレビューで文字サイズを合わせ済みのページをそのまま複製する
+    const pages=[...document.querySelectorAll('#sheetWrap .shelf-page')].map(p=>{const n=p.cloneNode(true);n.style.transform='';n.style.position='static';n.classList.add('print-page');return n});
+    $('#printArea').replaceChildren(...pages);
+    $('#pageSize').textContent='@page{size:210mm 297mm;margin:0}';
+    return pages.length;
+  }
+  const [w,h]=sheetDims(c.size,c.orient);
+  const imp=c.impose?imposition():null;
+  const page=document.createElement('div');
+  page.className='print-page'+(imp?' imposed':'');
+  const W=imp?imp.W:w, H=imp?imp.H:h;
+  page.style.width=W+'mm';page.style.height=H+'mm';
+  if(imp)page.style.gridTemplateColumns=`repeat(${imp.c},${w}mm)`;
+  const n=imp?imp.n:1;
+  for(let i=0;i<n;i++)page.appendChild(buildSheet({shop:state.shop,tpl,f:fieldsFor(tpl.id,state.shop),size:c.size,orient:c.orient,mood:curMood(),variant:curVariant(),k:lastFit.k}));
+  $('#printArea').replaceChildren(page);
+  $('#pageSize').textContent=`@page{size:${W}mm ${H}mm;margin:0}`;
+}
+async function doPrint(pdf){
+  if(buildPrint()===0){toast('印刷する棚札がありません。商品名を入力し、チェックを入れてください');return}
+  try{await document.fonts.ready}catch(e){}
+  const old=document.title, tpl=TPL[state.cur.tpl];
+  document.title=`${state.shop.name}_${tpl.name}_${state.cur.cat==='shelf'?SHELF_SIZES[state.shelf.size].short:SIZE_LABEL[state.cur.size]}`;
+  if(pdf)toast('印刷画面の「送信先（プリンター）」で「PDFに保存」を選んでください',7000);
+  setTimeout(()=>{window.print();document.title=old},pdf?300:30);
+}
+window.addEventListener('beforeprint',buildPrint);
+
+/* ---------------- 画像 ---------------- */
+function readImage(file,max=1400){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=()=>{const img=new Image();img.onload=()=>{
+      const s=Math.min(1,max/Math.max(img.width,img.height));
+      const cv=document.createElement('canvas');cv.width=Math.round(img.width*s);cv.height=Math.round(img.height*s);
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      res(file.type==='image/png'||file.type==='image/svg+xml'?cv.toDataURL('image/png'):cv.toDataURL('image/jpeg',.86));
+    };img.onerror=rej;img.src=r.result};
+    r.onerror=rej;r.readAsDataURL(file);
+  });
+}
+
+/* ---------------- イベント ---------------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const c=state.cur;
+  if(b.dataset.cat){if(c.cat!==b.dataset.cat){c.cat=b.dataset.cat;c.tpl=TEMPLATES.find(t=>t.cat===c.cat).id;c.size=CAT_SIZE[c.cat]}save();renderAll();return}
+  if(b.dataset.tpl){c.tpl=b.dataset.tpl;save();renderAll();return}
+  if(b.dataset.size){c.size=b.dataset.size;save();renderLeft();renderPreview();return}
+  if(b.dataset.o){c.orient=b.dataset.o;save();renderLeft();renderPreview();return}
+  if(b.dataset.mood!==undefined){c.mood=b.dataset.mood||null;c.variant=null;save();renderLeft();renderPreview();return}
+  if(b.dataset.v!==undefined&&b.closest('#variantSeg')){c.variant=+b.dataset.v;save();renderLeft();renderPreview();return}
+  if(b.dataset.clear){setField(b.dataset.clear,'');renderForm();return}
+  if(b.dataset.shelfsize){state.shelf.size=b.dataset.shelfsize;save();renderLeft();renderPreview();return}
+  if(b.dataset.shelf)shelfAction(b.dataset.shelf,+b.dataset.i);
+});
+
+function shelfAction(act,i){
+  const items=state.shelf.items;
+  if(act==='add')items.push({cat:items.length?items[items.length-1].cat:'',name:'',note:'',n:1,on:true});
+  else if(act==='del')items.splice(i,1);
+  else if(act==='all'||act==='none')items.forEach(it=>it.on=act==='all');
+  else if(act==='bulk'){
+    const rows=$('#shelfBulk').value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean).map(l=>l.split(/\t|,|，/).map(x=>x.trim()));
+    if(!rows.length){toast('貼り付ける内容を入力してください');return}
+    const add=rows.map(r=>r.length===1?{cat:'',name:r[0],note:''}:{cat:r[0]||'',name:r[1]||'',note:r.slice(2).join(' ')}).map(x=>({...x,n:1,on:true}));
+    state.shelf.items=$('#shelfReplace').checked?add:items.concat(add);
+    toast(`${add.length}件の棚札を追加しました`);
+  }
+  save();renderForm();renderPreview();
+  if(act==='add'){const el=document.getElementById(`sr-${state.shelf.items.length-1}-name`);if(el)el.focus()}
+}
+$('#impose').addEventListener('change',e=>{state.cur.impose=e.target.checked;save()});
+
+function setField(key,val){
+  const id=state.cur.tpl;
+  state.docs[id]=state.docs[id]||{};
+  state.docs[id][key]=val;
+  save();renderPreview();
+}
+['#formFields','#formMore'].forEach(sel=>{
+  $(sel).addEventListener('input',e=>{
+    const t=e.target;
+    if(t.dataset.col){
+      const it=state.shelf.items[+t.dataset.row];if(!it)return;
+      if(t.dataset.col==='on'){it.on=t.checked;t.closest('.srow').classList.toggle('off',!t.checked)}
+      else if(t.dataset.col==='n')it.n=Math.max(1,Math.min(99,parseInt(t.value,10)||1));
+      else it[t.dataset.col]=t.value;
+      save();renderPreview();return;
+    }
+    const k=t.dataset.key;if(k&&t.type!=='file')setField(k,t.value);
+  });
+  $(sel).addEventListener('change',async e=>{
+    const k=e.target.dataset.key;if(!k||e.target.type!=='file'||!e.target.files[0])return;
+    try{setField(k,await readImage(e.target.files[0]));renderForm()}catch(err){toast('画像を読み込めませんでした。JPEGかPNGの画像を選んでください。')}
+  });
+});
+$('#btnReset').addEventListener('click',()=>{delete state.docs[state.cur.tpl];save();renderForm();renderPreview();toast('文面を初期状態に戻しました')});
+$('#btnPrint').addEventListener('click',()=>doPrint(false));
+$('#btnPdf').addEventListener('click',()=>doPrint(true));
+new ResizeObserver(scalePreview).observe($('#stageInner'));
+if(document.fonts){document.fonts.ready.then(renderPreview);document.fonts.addEventListener?.('loadingdone',renderPreview)}
+
+let toastTimer;
+function toast(msg,ms=3500){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.hidden=true,ms)}
+
+/* ---------------- 店舗設定ウィザード ---------------- */
+let draft=null;
+function openWizard(){
+  draft=JSON.parse(JSON.stringify(state.shop));
+  const first=state.isSample;
+  if(first){draft.name='';draft.address='';draft.tel='';draft.hours='';draft.holiday='';draft.features=[];draft.mood='auto'}
+  $('#wizTitle').textContent=first?'薬局の情報を登録':'店舗設定';
+  $('#s-name').value=draft.name;$('#s-tagline').value=draft.tagline||'';
+  $('#s-address').value=draft.address||'';$('#s-tel').value=draft.tel||'';$('#s-hours').value=draft.hours||'';$('#s-holiday').value=draft.holiday||'';
+  $('#swatches').innerHTML=COLORS.map(([n,c])=>`<button type="button" data-color="${c}" title="${n}" aria-label="${n}" style="background:${c}"></button>`).join('')+
+    `<label for="s-color">好きな色<input type="color" id="s-color" value="${draft.color}"></label>`;
+  $('#featureChips').innerHTML=FEATURES.map(f=>`<label><input type="checkbox" value="${f.id}"${draft.features.includes(f.id)?' checked':''}><span>${f.label}</span></label>`).join('');
+  $('#moodChoices').innerHTML=[['auto',{name:'おまかせ',desc:'選んだ特徴から自動で決めます'}],...Object.entries(MOODS)].map(([k,m])=>
+    `<label><input type="radio" name="mood" value="${k}"${(draft.mood||'auto')===k?' checked':''}><span class="card">${k==='auto'?'<span class="aa">自動</span>':`<span class="aa" style="font-family:${m.ft}${m.serif?SERIF_FB:SANS_FB};font-weight:${m.tw}">あ Aa</span>`}<b>${m.name}</b><small>${m.desc}</small></span></label>`).join('');
+  syncLogo();syncSwatches();
+  $('#wizard').hidden=false;
+  setTimeout(()=>{$('#s-name').focus();renderWizPreview()},30);
+}
+function closeWizard(){$('#wizard').hidden=true}
+function syncSwatches(){document.querySelectorAll('#swatches button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.color.toLowerCase()===draft.color.toLowerCase()))}
+function syncLogo(){const t=$('#logoThumb');t.hidden=!draft.logo;if(draft.logo)t.src=draft.logo;$('#logoClear').hidden=!draft.logo}
+function readWizard(){
+  draft.name=$('#s-name').value.trim();draft.tagline=$('#s-tagline').value.trim();
+  draft.address=$('#s-address').value.trim();draft.tel=$('#s-tel').value.trim();draft.hours=$('#s-hours').value.trim();draft.holiday=$('#s-holiday').value.trim();
+  draft.features=[...document.querySelectorAll('#featureChips input:checked')].map(i=>i.value);
+  draft.mood=(document.querySelector('#moodChoices input:checked')||{}).value||'auto';
+}
+function renderWizPreview(){
+  if($('#wizard').hidden)return;
+  readWizard();
+  const shop={...draft,name:draft.name||'（薬局名）'};
+  const mood=resolveMood(shop), tpl=TPL['flyer-shop'];
+  const sheet=buildSheet({shop,tpl,f:tpl.d(shop),size:'A4',orient:'portrait',mood,variant:MOODS[mood].variant});
+  const host=document.createElement('div');host.appendChild(sheet);
+  const pv=$('#wizPv');pv.replaceChildren(host);
+  fit(sheet);
+  placeScaled(sheet,host,pv.clientWidth-8,pv.clientHeight-8);
+  $('#wizMoodNote').textContent=`雰囲気：${MOODS[mood].name}${draft.mood==='auto'?'（特徴から自動で選択）':''}。デザイン案はあとから切り替えられます。`;
+}
+$('#wizForm').addEventListener('input',e=>{
+  if(e.target.id==='s-color'){draft.color=e.target.value;syncSwatches()}
+  renderWizPreview();
+});
+$('#wizForm').addEventListener('change',async e=>{
+  if(e.target.id==='s-logo'&&e.target.files[0]){try{draft.logo=await readImage(e.target.files[0],600);syncLogo();renderWizPreview()}catch(err){toast('ロゴ画像を読み込めませんでした')}}
+  else renderWizPreview();
+});
+$('#swatches').addEventListener('click',e=>{const b=e.target.closest('button[data-color]');if(!b)return;draft.color=b.dataset.color;$('#s-color').value=draft.color;syncSwatches();renderWizPreview()});
+$('#logoClear').addEventListener('click',()=>{draft.logo='';$('#s-logo').value='';syncLogo();renderWizPreview()});
+$('#wizForm').addEventListener('submit',e=>{
+  e.preventDefault();readWizard();
+  if(!draft.name){$('#s-name').focus();toast('薬局名を入力してください');return}
+  state.shop=draft;state.isSample=false;state.cur.mood=null;state.cur.variant=null;
+  save();closeWizard();renderAll();toast(`「${MOODS[resolveMood(state.shop)].name}」のデザインで作成しました`);
+});
+$('#wizCancel').addEventListener('click',closeWizard);
+$('#wizard').addEventListener('keydown',e=>{if(e.key==='Escape')closeWizard()});
+$('#shopChip').addEventListener('click',openWizard);
+$('#bannerSetup').addEventListener('click',openWizard);
+new ResizeObserver(()=>renderWizPreview()).observe($('#wizPv'));
+
+$('#btnExport').addEventListener('click',()=>{
+  readWizard();
+  const data=JSON.stringify({...state,shop:{...draft,name:draft.name||state.shop.name}},null,2);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+  a.download=`薬局POPスタジオ_設定_${(draft.name||'店舗').replace(/[\\/:*?"<>|\s]/g,'')}.json`;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+});
+$('#importFile').addEventListener('change',e=>{
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const s=JSON.parse(r.result);if(!s.shop)throw 0;state=normalize(s);state.isSample=false;save();closeWizard();renderAll();toast('設定を読み込みました')}catch(err){toast('このファイルは読み込めませんでした。書き出した設定ファイル（.json）を選んでください。')}};
+  r.readAsText(file);e.target.value='';
+});
+
+/* ---------------- 起動 ---------------- */
+renderAll();
+if(state.isSample)openWizard();
+</script>
+</body>
+</html>
