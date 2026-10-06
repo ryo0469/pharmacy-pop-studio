@@ -347,6 +347,29 @@ details.more .fields{margin-top:10px}
 .page-host > .shelf-page{position:absolute;left:0;top:0;transform-origin:0 0}
 .stage-inner.scroll{overflow-y:auto;place-items:start center}
 
+/* イラスト（テーマ色で塗る簡単な線画） */
+.ill svg,.ill-grid svg,.sl-ill svg{display:block;width:100%;height:100%}
+.ib{fill:var(--pt)}
+.ic1{fill:var(--p)} .ic2{fill:var(--pt)} .ic3{fill:var(--a)} .ic4{fill:#fff} .ic5{fill:var(--pd)}
+.is{fill:none;stroke:var(--pd);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.isw{fill:none;stroke:#fff;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round}
+.hd.has-ill{display:flex;align-items:center;gap:1.2em}
+.hd-text{flex:1;min-width:0}
+.ill{flex:none;width:24cqmin;aspect-ratio:1}
+.c-pop .ill{width:27cqmin}
+.land .ill{width:21cqmin}
+.v1 .hd.has-ill{flex-direction:column;gap:.5em}
+.v1 .ill{order:-1;width:17cqmin}
+.v1 .hd-text{width:100%}
+.m-wa .ib{fill:var(--ps)}
+.sl-ill{position:absolute;right:2.5cqw;top:50%;transform:translateY(-50%);width:52cqh;aspect-ratio:1;z-index:1}
+.shelf.v1 .sl-ill{right:5cqw;width:46cqh}
+.shelf.with-ill .sl-main{padding-right:calc(52cqh + 4cqw)}
+.shelf.v1.with-ill .sl-main{padding-right:calc(46cqh + 3cqw)}
+.ill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:6px}
+.ill-grid button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:3px;cursor:pointer;aspect-ratio:1;display:grid;place-items:center;font-size:11px;color:var(--muted)}
+.ill-grid button[aria-pressed="true"]{border-color:var(--ua);box-shadow:inset 0 0 0 1px var(--ua);background:var(--ua-soft)}
+
 /* 棚札の入力欄 */
 .shelf-tools{display:flex;gap:6px;flex-wrap:wrap}
 .srows{display:flex;flex-direction:column;gap:8px}
@@ -409,6 +432,7 @@ details.more .fields{margin-top:10px}
       </section>
       <section>
         <h2>デザイン</h2>
+        <label class="check"><input type="checkbox" id="illOn"><span>イラストを入れる</span></label>
         <div class="mood-list" id="moodList"></div>
         <div class="seg" id="variantSeg">
           <button type="button" data-v="0">案A 帯</button>
@@ -608,6 +632,41 @@ const TEMPLATES = [
 ];
 const TPL = Object.fromEntries(TEMPLATES.map(t=>[t.id,t]));
 
+/* ---------------- イラスト（viewBox 100×100、色はテーマから） ---------------- */
+const BG='<circle class="ib" cx="50" cy="50" r="46"/>';
+const ILLS = {
+  capsule:{name:'カプセル',svg:`${BG}<g transform="rotate(-40 50 50)"><rect class="ic4" x="22" y="38" width="56" height="24" rx="12"/><path class="ic1" d="M50 38h16a12 12 0 0 1 0 24H50z"/><rect class="is" x="22" y="38" width="56" height="24" rx="12"/><path class="is" d="M50 38v24"/></g><circle class="ic3" cx="30" cy="74" r="7"/><circle class="ic4" cx="73" cy="27" r="6"/><circle class="is" cx="73" cy="27" r="6"/>`},
+  clock:{name:'時計',svg:`${BG}<circle class="ic1" cx="31" cy="30" r="8"/><circle class="ic1" cx="69" cy="30" r="8"/><circle class="ic4" cx="50" cy="53" r="26"/><circle class="is" cx="50" cy="53" r="26"/><path class="is" d="M50 39v14l10 7"/><circle class="ic3" cx="50" cy="32" r="2.6"/><circle class="ic3" cx="71" cy="53" r="2.6"/><circle class="ic3" cx="50" cy="74" r="2.6"/><circle class="ic3" cx="29" cy="53" r="2.6"/>`},
+  calendar:{name:'カレンダー',svg:`${BG}<rect class="ic4" x="24" y="28" width="52" height="48" rx="6"/><path class="ic1" d="M24 34a6 6 0 0 1 6-6h40a6 6 0 0 1 6 6v8H24z"/><rect class="is" x="24" y="28" width="52" height="48" rx="6"/><path class="is" d="M36 22v10M64 22v10"/><circle class="ic3" cx="64" cy="64" r="7"/><circle class="ic5" cx="36" cy="53" r="2.8"/><circle class="ic5" cx="50" cy="53" r="2.8"/><circle class="ic5" cx="64" cy="53" r="2.8"/><circle class="ic5" cx="36" cy="64" r="2.8"/><circle class="ic5" cx="50" cy="64" r="2.8"/>`},
+  card:{name:'カード',svg:`${BG}<rect class="ic4" x="17" y="30" width="66" height="42" rx="6"/><rect class="is" x="17" y="30" width="66" height="42" rx="6"/><circle class="ic1" cx="35" cy="46" r="6"/><path class="ic1" d="M25 62a10 9 0 0 1 20 0z"/><rect class="ic2" x="52" y="41" width="22" height="4.5" rx="2.2"/><rect class="ic2" x="52" y="49" width="16" height="4.5" rx="2.2"/><rect class="ic2" x="52" y="57" width="19" height="4.5" rx="2.2"/><circle class="ic3" cx="76" cy="73" r="11"/><path class="isw" d="M71 73l4 4 7-8"/>`},
+  notebook:{name:'お薬手帳',svg:`${BG}<rect class="ic1" x="28" y="20" width="44" height="60" rx="5"/><rect class="ic5" x="28" y="20" width="9" height="60" rx="4"/><rect class="ic4" x="43" y="31" width="23" height="13" rx="3"/><g transform="rotate(-35 54 62)"><rect class="ic4" x="44" y="57" width="20" height="10" rx="5"/><path class="ic3" d="M54 57h5a5 5 0 0 1 0 10h-5z"/></g><rect class="is" x="28" y="20" width="44" height="60" rx="5"/>`},
+  mask:{name:'マスク',svg:`${BG}<path class="is" d="M27 41c-11 0-11 22 1 22M73 41c11 0 11 22-1 22"/><path class="ic4" d="M26 37q24-9 48 0v23q-24 15-48 0z"/><path class="is" d="M26 37q24-9 48 0v23q-24 15-48 0z"/><path class="is" d="M33 46h34M33 54h34" style="stroke:var(--pt)"/><circle class="ic3" cx="74" cy="25" r="5"/><circle class="ic1" cx="24" cy="76" r="4"/>`},
+  medbox:{name:'お薬の箱',svg:`${BG}<path class="ic5" d="M28 34l6-10h32l6 10z"/><path class="ic1" d="M28 34h44v42a4 4 0 0 1-4 4H32a4 4 0 0 1-4-4z"/><rect class="ic4" x="34" y="44" width="32" height="22" rx="3"/><rect class="ic2" x="40" y="51" width="20" height="8" rx="4"/><path class="ic3" d="M50 51h6a4 4 0 0 1 0 8h-6z"/><path class="is" d="M28 34h44v42a4 4 0 0 1-4 4H32a4 4 0 0 1-4-4zM28 34l6-10h32l6 10"/>`},
+  bowl:{name:'食事',svg:`${BG}<path class="is" d="M40 32c-4-5 4-8 0-13M52 32c-4-5 4-8 0-13M64 32c-4-5 4-8 0-13"/><path class="ic1" d="M20 45h60a30 28 0 0 1-60 0z"/><rect class="ic5" x="18" y="41" width="64" height="7" rx="3.5"/><rect class="ic5" x="38" y="71" width="24" height="6" rx="3"/><circle class="ic3" cx="50" cy="58" r="5"/>`},
+  flower:{name:'花',svg:`${BG}<path class="is" d="M50 58v24"/><path class="ic1" d="M50 74c-12-2-16-10-16-15 8 0 16 4 16 15z"/><circle class="ic4" cx="50" cy="33" r="9"/><circle class="ic4" cx="62" cy="42" r="9"/><circle class="ic4" cx="57" cy="56" r="9"/><circle class="ic4" cx="43" cy="56" r="9"/><circle class="ic4" cx="38" cy="42" r="9"/><circle class="is" cx="50" cy="33" r="9"/><circle class="is" cx="62" cy="42" r="9"/><circle class="is" cx="57" cy="56" r="9"/><circle class="is" cx="43" cy="56" r="9"/><circle class="is" cx="38" cy="42" r="9"/><circle class="ic3" cx="50" cy="46" r="8"/><circle class="ic3" cx="25" cy="28" r="3"/><circle class="ic3" cx="76" cy="27" r="3.5"/><circle class="ic3" cx="78" cy="62" r="2.5"/>`},
+  store:{name:'薬局',svg:`${BG}<rect class="ic4" x="24" y="42" width="52" height="36"/><rect class="is" x="24" y="42" width="52" height="36"/><path class="ic1" d="M20 31h60l-3 14H23z"/><path class="ic4" d="M32 31h9l-1 14h-9zM51 31h9l1 14h-9z" opacity=".85"/><path class="is" d="M20 31h60l-3 14H23z"/><rect class="ic1" x="43" y="56" width="14" height="22"/><rect class="ic2" x="29" y="53" width="10" height="11"/><rect class="ic2" x="61" y="53" width="10" height="11"/><rect class="ic3" x="38" y="19" width="24" height="9" rx="4.5"/><path class="is" d="M17 78h66"/>`},
+  heart:{name:'ハート',svg:`${BG}<path class="ic1" d="M50 80C22 62 16 50 16 38A16 16 0 0 1 50 30A16 16 0 0 1 84 38C84 50 78 62 50 80Z"/><path class="isw" d="M24 50h14l5-10 7 20 6-14 4 4h16"/><circle class="ic3" cx="76" cy="24" r="5"/>`},
+  house:{name:'家',svg:`${BG}<rect class="ic5" x="63" y="26" width="8" height="16"/><path class="ic1" d="M15 51L50 22l35 29z"/><rect class="ic4" x="25" y="49" width="50" height="31"/><rect class="is" x="25" y="49" width="50" height="31"/><path class="is" d="M15 51L50 22l35 29"/><rect class="ic5" x="44" y="60" width="12" height="20" rx="2"/><circle class="ic3" cx="34" cy="62" r="5"/><circle class="ic3" cx="66" cy="62" r="5"/>`},
+  eyedrop:{name:'目薬',svg:`${BG}<path class="ic1" d="M44 41v-8l6-11 6 11v8z"/><rect class="ic4" x="37" y="40" width="26" height="39" rx="6"/><rect class="is" x="37" y="40" width="26" height="39" rx="6"/><rect class="ic2" x="42" y="52" width="16" height="15" rx="2"/><path class="ic3" d="M74 50s-7 9-7 13a7 7 0 0 0 14 0c0-4-7-13-7-13z"/>`},
+  bandage:{name:'絆創膏・湿布',svg:`${BG}<g transform="rotate(-35 50 50)"><rect class="ic3" x="15" y="37" width="70" height="26" rx="13"/><rect class="ic4" x="38" y="39" width="24" height="22" rx="3"/><rect class="is" x="15" y="37" width="70" height="26" rx="13"/><circle class="ic5" cx="24" cy="46" r="1.8"/><circle class="ic5" cx="24" cy="54" r="1.8"/><circle class="ic5" cx="76" cy="46" r="1.8"/><circle class="ic5" cx="76" cy="54" r="1.8"/></g>`},
+  leaf:{name:'葉（漢方）',svg:`${BG}<path class="ic1" d="M25 76C25 41 45 24 79 22c0 35-19 54-54 54z"/><path class="isw" d="M29 72C43 56 55 43 70 31"/><path class="ic3" d="M26 40c0-8 6-13 14-13 0 8-6 13-14 13z"/>`},
+  baby:{name:'哺乳びん',svg:`${BG}<path class="ic3" d="M44 32c0-9 12-9 12 0v5H44z"/><rect class="ic1" x="37" y="35" width="26" height="8" rx="2"/><rect class="ic4" x="36" y="43" width="28" height="37" rx="9"/><rect class="is" x="36" y="43" width="28" height="37" rx="9"/><path class="is" d="M44 53h7M44 61h7M44 69h7"/>`},
+};
+const ILL_DEFAULT = {'notice-hours':'clock','notice-holiday':'calendar','notice-myna':'card','notice-generic':'capsule','notice-techo':'notebook','notice-infection':'mask',
+  'pop-price':'medbox','pop-staff':'bowl','pop-season':'flower','flyer-shop':'store','flyer-event':'heart','flyer-home':'house'};
+// 棚札はカテゴリ名・商品名の言葉からイラストを選ぶ
+const SHELF_ILL_RULES = [[/目薬|目|眼/,'eyedrop'],[/鼻|花粉|アレルギー/,'flower'],[/湿布|外用|傷|絆創膏|ばんそう|塗り/,'bandage'],[/マスク|衛生|消毒|除菌/,'mask'],
+  [/ベビー|赤ちゃん|おむつ|哺乳|ミルク/,'baby'],[/漢方|生薬|ハーブ/,'leaf'],[/化粧|スキン|美容|肌/,'leaf'],[/食品|食事|みそ|スープ|飲料|お茶/,'bowl'],[/介護|在宅/,'house']];
+function shelfIll(item){const t=`${item.cat||''} ${item.name||''}`;for(const[re,k]of SHELF_ILL_RULES)if(re.test(t))return k;return 'capsule'}
+const illSvg=k=>ILLS[k]?`<svg viewBox="0 0 100 100" aria-hidden="true">${ILLS[k].svg}</svg>`:'';
+// テンプレートで使うイラスト（オフ・なし・写真ありのときは null）
+function illFor(tplId,f){
+  if(!state.cur.illust||f.image)return null;
+  const v=(state.docs[tplId]||{}).illust;
+  if(v==='none')return null;
+  return ILLS[v]?v:(ILL_DEFAULT[tplId]||null);
+}
+
 const SAMPLE_SHOP = {name:'みどり薬局 駅前店',tagline:'',color:'#2f8f5b',features:['kakari','zaitaku','kids','parking'],mood:'auto',
   address:'東京都○○区△△ 1-2-3',tel:'03-1234-5678',hours:'月〜金 9:00〜19:00\n土 9:00〜13:00',holiday:'日曜・祝日',logo:''};
 
@@ -660,7 +719,7 @@ function load(){
 }
 function normalize(s){
   s.docs=s.docs||{};
-  s.cur=Object.assign({cat:'flyer',tpl:'flyer-shop',size:'A4',orient:'portrait',variant:null,mood:null,impose:true},s.cur||{});
+  s.cur=Object.assign({cat:'flyer',tpl:'flyer-shop',size:'A4',orient:'portrait',variant:null,mood:null,impose:true,illust:true},s.cur||{});
   if(!TPL[s.cur.tpl])s.cur.tpl='flyer-shop';
   s.shop=Object.assign({...SAMPLE_SHOP,features:[]},s.shop);
   s.shelf=Object.assign({size:'quarter',items:SHELF_SAMPLE.map(x=>({...x}))},s.shelf||{});
@@ -706,11 +765,12 @@ function applyTheme(el,shop,mood,k){
 // reserveNote: どれか1枚でも補足があれば、全札に補足の行を確保して商品名の高さをそろえる
 function buildShelfLabel({shop,item,h,mood,variant,reserveNote}){
   const el=document.createElement('div');
-  el.className=`sheet shelf m-${mood} v${variant}`;
+  const ill=state.cur.illust?shelfIll(item):null;
+  el.className=`sheet shelf m-${mood} v${variant}${ill?' with-ill':''}`;
   el.style.width='210mm';el.style.height=h+'mm';
   applyTheme(el,shop,mood,1);
   const cat=String(item.cat||'').trim(), note=String(item.note||'').trim();
-  el.innerHTML=`<div class="deco"></div><div class="inner">`+
+  el.innerHTML=`<div class="deco"></div><div class="inner">`+(ill?`<div class="sl-ill">${illSvg(ill)}</div>`:'')+
     `<div class="sl-cat${cat?'':' empty'}">${cat?br(item.cat):'&nbsp;'}</div>`+
     `<div class="sl-main"><div class="sl-name">${br(item.name||'')}</div>`+
     (note?`<div class="sl-note">${esc(note)}</div>`:reserveNote?`<div class="sl-note empty">&nbsp;</div>`:'')+`</div></div>`;
@@ -732,7 +792,7 @@ function shelfPages(){
   return {pages,total:list.length,per:S.per,h:297/S.per};
 }
 
-function buildSheet({shop,tpl,f,size,orient,mood,variant,k=1}){
+function buildSheet({shop,tpl,f,size,orient,mood,variant,k=1,ill=null}){
   const [w,h]=sheetDims(size,orient);
   const el=document.createElement('div');
   el.className=`sheet m-${mood} v${variant} c-${tpl.cat} ${orient==='landscape'?'land':'port'}${f.image?' has-photo':''}`;
@@ -772,7 +832,7 @@ function buildSheet({shop,tpl,f,size,orient,mood,variant,k=1}){
   }
 
   el.innerHTML=`<div class="deco"><i class="d1"></i><i class="d2"></i><i class="d3"></i></div>`+
-    `<div class="inner"><header class="hd">${hd}</header><main class="bd">${f.image?`<figure class="photo"><img src="${f.image}" alt=""></figure>`:''}<div class="col"><div class="txt">${txt}</div>${price}</div></main>${ft}</div>`;
+    `<div class="inner"><header class="hd${ill?' has-ill':''}"><div class="hd-text">${hd}</div>${ill?`<div class="ill">${illSvg(ill)}</div>`:''}</header><main class="bd">${f.image?`<figure class="photo"><img src="${f.image}" alt=""></figure>`:''}<div class="col"><div class="txt">${txt}</div>${price}</div></main>${ft}</div>`;
   return el;
 }
 
@@ -830,6 +890,7 @@ function renderLeft(){
   const auto=resolveMood(state.shop);
   $('#moodList').innerHTML=`<button type="button" class="auto" data-mood="" aria-pressed="${!c.mood}"><b>店舗設定どおり</b><small>いまは「${MOODS[auto].name}」</small></button>`+
     Object.entries(MOODS).map(([k,m])=>`<button type="button" data-mood="${k}" aria-pressed="${c.mood===k}"><span class="aa" style="font-family:${m.ft}${m.serif?SERIF_FB:SANS_FB};font-weight:${m.tw}">あ Aa</span><small>${m.short}</small></button>`).join('');
+  $('#illOn').checked=!!c.illust;
   const v=curVariant();
   document.querySelectorAll('#variantSeg button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.v===v));
 }
@@ -851,7 +912,7 @@ function renderShelfForm(){
       <button type="button" class="btn small ghost" data-shelf="all">すべて印刷する</button>
       <button type="button" class="btn small ghost" data-shelf="none">すべて外す</button>
     </div>
-    <span class="hint" style="font-size:11.5px;color:var(--muted)">チェックを入れた行だけ印刷します。枚数を増やすと同じ棚札を続けて並べます。</span>
+    <span class="hint" style="font-size:11.5px;color:var(--muted)">チェックを入れた行だけ印刷します。枚数を増やすと同じ棚札を続けて並べます。${state.cur.illust?'イラストはカテゴリ名と商品名から自動で選びます（目薬・湿布・マスク・ベビー用品など）。':''}</span>
     <div class="srows">${rows||'<p class="hint">棚札がありません。「1行追加」から入力してください。</p>'}</div>
     <details class="more"><summary>まとめて追加（Excelから貼り付け）</summary>
       <div class="fields">
@@ -862,6 +923,16 @@ function renderShelfForm(){
         <button type="button" class="btn small" data-shelf="bulk">貼り付けた内容を追加</button>
       </div>
     </details>`;
+}
+
+// イラストの選択欄（左の「イラストを入れる」がオンのときだけ表示）
+function illPicker(tplId,f){
+  if(!state.cur.illust)return '';
+  const saved=(state.docs[tplId]||{}).illust, cur=saved==='none'?'none':(ILLS[saved]?saved:ILL_DEFAULT[tplId]);
+  const btns=`<button type="button" data-ill="none" aria-pressed="${cur==='none'}" title="イラストなし">なし</button>`+
+    Object.entries(ILLS).map(([k,v])=>`<button type="button" data-ill="${k}" aria-pressed="${cur===k}" title="${v.name}" aria-label="${v.name}">${illSvg(k)}</button>`).join('');
+  return `<div class="field"><span class="lbl">イラスト</span><div class="ill-grid" id="illGrid">${btns}</div>`+
+    `<span class="hint">${f.image?'写真を入れているあいだは、イラストは表示しません':'最初はテンプレートに合ったイラストが選ばれています'}</span></div>`;
 }
 
 function renderForm(){
@@ -881,8 +952,9 @@ function renderForm(){
   };
   const main=tpl.fields.slice().sort((a,b)=>FIELD_ORDER.indexOf(a)-FIELD_ORDER.indexOf(b));
   const rest=FIELD_ORDER.filter(k=>!main.includes(k)&&!(k==='risk'&&tpl.cat!=='pop'));
-  $('#formFields').innerHTML=main.map(mk).join('');
+  $('#formFields').innerHTML=illPicker(tpl.id,f)+main.map(mk).join('');
   $('#formMore').innerHTML=rest.map(mk).join('');
+  const g=$('#illGrid');if(g)applyTheme(g,state.shop,curMood(),1);
   $('#lawNote').innerHTML=tpl.law?`<div class="law">医薬品・健康食品の表現は、薬機法と医薬品等適正広告基準に沿っているかご確認ください。効果を断定する表現や、ほかの商品をおとしめる表現は使えません。</div>`:'';
 }
 
@@ -891,10 +963,12 @@ function renderPreview(){
   cancelAnimationFrame(rafId);
   rafId=requestAnimationFrame(()=>{
     const c=state.cur, tpl=TPL[c.tpl];
+    const g=$('#illGrid');if(g)applyTheme(g,state.shop,curMood(),1);
     const wrap0=$('#sheetWrap'), multi=c.cat==='shelf';
     wrap0.classList.toggle('multi',multi);$('#stageInner').classList.toggle('scroll',multi);
     if(multi){renderShelfPreview();return}
-    const sheet=buildSheet({shop:state.shop,tpl,f:fieldsFor(tpl.id,state.shop),size:c.size,orient:c.orient,mood:curMood(),variant:curVariant()});
+    const f=fieldsFor(tpl.id,state.shop);
+    const sheet=buildSheet({shop:state.shop,tpl,f,size:c.size,orient:c.orient,mood:curMood(),variant:curVariant(),ill:illFor(tpl.id,f)});
     const wrap=$('#sheetWrap');wrap.replaceChildren(sheet);
     lastFit=fit(sheet);
     scalePreview();
@@ -961,7 +1035,8 @@ function buildPrint(){
   page.style.width=W+'mm';page.style.height=H+'mm';
   if(imp)page.style.gridTemplateColumns=`repeat(${imp.c},${w}mm)`;
   const n=imp?imp.n:1;
-  for(let i=0;i<n;i++)page.appendChild(buildSheet({shop:state.shop,tpl,f:fieldsFor(tpl.id,state.shop),size:c.size,orient:c.orient,mood:curMood(),variant:curVariant(),k:lastFit.k}));
+  const f=fieldsFor(tpl.id,state.shop), ill=illFor(tpl.id,f);
+  for(let i=0;i<n;i++)page.appendChild(buildSheet({shop:state.shop,tpl,f,size:c.size,orient:c.orient,mood:curMood(),variant:curVariant(),k:lastFit.k,ill}));
   $('#printArea').replaceChildren(page);
   $('#pageSize').textContent=`@page{size:${W}mm ${H}mm;margin:0}`;
 }
@@ -1001,7 +1076,8 @@ document.addEventListener('click',e=>{
   if(b.dataset.v!==undefined&&b.closest('#variantSeg')){c.variant=+b.dataset.v;save();renderLeft();renderPreview();return}
   if(b.dataset.clear){setField(b.dataset.clear,'');renderForm();return}
   if(b.dataset.shelfsize){state.shelf.size=b.dataset.shelfsize;save();renderLeft();renderPreview();return}
-  if(b.dataset.shelf)shelfAction(b.dataset.shelf,+b.dataset.i);
+  if(b.dataset.shelf){shelfAction(b.dataset.shelf,+b.dataset.i);return}
+  if(b.dataset.ill){setField('illust',b.dataset.ill);document.querySelectorAll('#illGrid button').forEach(x=>x.setAttribute('aria-pressed',x===b));return}
 });
 
 function shelfAction(act,i){
@@ -1020,6 +1096,7 @@ function shelfAction(act,i){
   if(act==='add'){const el=document.getElementById(`sr-${state.shelf.items.length-1}-name`);if(el)el.focus()}
 }
 $('#impose').addEventListener('change',e=>{state.cur.impose=e.target.checked;save()});
+$('#illOn').addEventListener('change',e=>{state.cur.illust=e.target.checked;save();renderForm();renderPreview()});
 
 function setField(key,val){
   const id=state.cur.tpl;
@@ -1085,7 +1162,7 @@ function renderWizPreview(){
   readWizard();
   const shop={...draft,name:draft.name||'（薬局名）'};
   const mood=resolveMood(shop), tpl=TPL['flyer-shop'];
-  const sheet=buildSheet({shop,tpl,f:tpl.d(shop),size:'A4',orient:'portrait',mood,variant:MOODS[mood].variant});
+  const sheet=buildSheet({shop,tpl,f:tpl.d(shop),size:'A4',orient:'portrait',mood,variant:MOODS[mood].variant,ill:ILL_DEFAULT[tpl.id]});
   const host=document.createElement('div');host.appendChild(sheet);
   const pv=$('#wizPv');pv.replaceChildren(host);
   fit(sheet);
