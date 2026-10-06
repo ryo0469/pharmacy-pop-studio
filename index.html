@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>薬局POPスタジオ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -316,18 +317,20 @@ details.more .fields{margin-top:10px}
 
 /* 棚札（A4を4等分・8等分した帯） */
 .shelf .deco{display:none}
-.shelf .inner{flex-direction:row;padding:0;gap:0;font-size:calc(var(--k) * 10.5cqh);line-height:1.3}
-.sl-cat{flex:none;min-width:24%;max-width:40%;display:flex;align-items:center;justify-content:center;padding:.4em .9em;background:var(--p);color:var(--onp);
+/* 札ごとの位置をそろえるため、カテゴリ欄は固定幅・補足欄は行を確保し、長い商品名は商品名だけを縮小する */
+.shelf .inner{flex-direction:row;padding:0;gap:0;font-size:10.5cqh;line-height:1.3}
+.sl-cat{flex:0 0 26%;min-width:0;display:flex;align-items:center;justify-content:center;padding:.4em .9em;background:var(--p);color:var(--onp);
   font-family:var(--ft);font-weight:var(--tw);font-size:1.25em;line-height:1.25;text-align:center;word-break:auto-phrase}
-.sl-main{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:.15em;padding:.4em 1.1em}
-.sl-name{font-family:var(--ft);font-weight:var(--tw);font-size:2.2em;line-height:1.2;color:var(--ink);word-break:auto-phrase;letter-spacing:.02em}
+.sl-main{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:safe center;gap:.15em;padding:.4em 1.1em}
+.sl-name{font-family:var(--ft);font-weight:var(--tw);font-size:calc(2.2em * var(--kn, 1));line-height:1.2;color:var(--ink);word-break:auto-phrase;letter-spacing:.02em}
 .sl-note{font-size:1.05em;font-weight:700;color:var(--pd)}
+.sl-note.empty,.shelf.v1 .sl-cat.empty{visibility:hidden}
 .shelf.v1::before{inset:6cqh 1.6cqw;border-width:2.2cqh}
-.shelf.v1 .inner{flex-direction:column;justify-content:center;padding:0 5cqw}
-.shelf.v1 .sl-cat{align-self:flex-start;min-width:0;max-width:none;padding:.1em .8em;font-size:.9em;border-radius:calc(var(--r) * 1em)}
+.shelf.v1 .inner{flex-direction:column;justify-content:safe center;padding:0 5cqw}
+.shelf.v1 .sl-cat{flex:none;align-self:flex-start;padding:.1em .8em;font-size:.9em;border-radius:calc(var(--r) * 1em)}
 .shelf.v1 .sl-main{flex:none;padding:.1em 0 0}
 .shelf.v2 .inner{flex-direction:column}
-.shelf.v2 .sl-cat{min-width:0;max-width:none;justify-content:flex-start;background:var(--ps);color:var(--pd);padding:.15em 1em;font-size:1.15em;border-bottom:.15em solid var(--p)}
+.shelf.v2 .sl-cat{flex:none;justify-content:flex-start;background:var(--ps);color:var(--pd);padding:.15em 1em;font-size:1.15em;border-bottom:.15em solid var(--p)}
 .shelf.v2 .sl-main{padding:.1em 1.1em .2em}
 .m-gentle.shelf.v0 .sl-cat{border-radius:0 2em 2em 0}
 .m-trust.shelf .sl-name{font-weight:700}
@@ -700,15 +703,26 @@ function applyTheme(el,shop,mood,k){
 }
 
 // 棚札1枚
-function buildShelfLabel({shop,item,h,mood,variant}){
+// reserveNote: どれか1枚でも補足があれば、全札に補足の行を確保して商品名の高さをそろえる
+function buildShelfLabel({shop,item,h,mood,variant,reserveNote}){
   const el=document.createElement('div');
   el.className=`sheet shelf m-${mood} v${variant}`;
   el.style.width='210mm';el.style.height=h+'mm';
   applyTheme(el,shop,mood,1);
+  const cat=String(item.cat||'').trim(), note=String(item.note||'').trim();
   el.innerHTML=`<div class="deco"></div><div class="inner">`+
-    (String(item.cat||'').trim()?`<div class="sl-cat">${br(item.cat)}</div>`:'')+
-    `<div class="sl-main"><div class="sl-name">${br(item.name||'')}</div>${String(item.note||'').trim()?`<div class="sl-note">${esc(item.note)}</div>`:''}</div></div>`;
+    `<div class="sl-cat${cat?'':' empty'}">${cat?br(item.cat):'&nbsp;'}</div>`+
+    `<div class="sl-main"><div class="sl-name">${br(item.name||'')}</div>`+
+    (note?`<div class="sl-note">${esc(note)}</div>`:reserveNote?`<div class="sl-note empty">&nbsp;</div>`:'')+`</div></div>`;
   return el;
+}
+// 商品名だけを縮小して札に収める（カテゴリ欄・補足は全札同じ大きさ）
+function fitShelf(sheet){
+  const inner=sheet.querySelector('.inner'), name=sheet.querySelector('.sl-name'), main=sheet.querySelector('.sl-main');
+  const overflow=()=>inner.scrollHeight>inner.clientHeight+1||main.scrollHeight>main.clientHeight+1||inner.scrollWidth>inner.clientWidth+1||name.scrollWidth>name.clientWidth+1;
+  let k=1,g=0;sheet.style.setProperty('--kn',k);
+  while(overflow()&&k>0.35&&g++<50){k=Math.round((k-0.03)*1000)/1000;sheet.style.setProperty('--kn',k)}
+  return {k,over:overflow()};
 }
 // 印刷対象の棚札を枚数ぶん展開し、A4ごとに分ける
 function shelfPages(){
@@ -894,16 +908,17 @@ function renderShelfPreview(){
   const {pages,total,per,h}=shelfPages(), mood=curMood(), variant=curVariant(), wrap=$('#sheetWrap');
   wrap.style.width='';wrap.style.height='';
   let over=0;
+  const reserveNote=pages.some(p=>p.some(it=>String(it.note||'').trim()));
   const hosts=pages.map(items=>{
     const page=document.createElement('div');
     page.className='shelf-page';
     page.style.width='210mm';page.style.height='297mm';page.style.gridTemplateRows=`repeat(${per},${h}mm)`;
-    items.forEach(it=>page.appendChild(buildShelfLabel({shop:state.shop,item:it,h,mood,variant})));
+    items.forEach(it=>page.appendChild(buildShelfLabel({shop:state.shop,item:it,h,mood,variant,reserveNote})));
     const host=document.createElement('div');host.className='page-host';host.appendChild(page);
     return host;
   });
   wrap.replaceChildren(...hosts);
-  wrap.querySelectorAll('.sheet').forEach(s=>{if(fit(s).over)over++});
+  wrap.querySelectorAll('.sheet').forEach(s=>{if(fitShelf(s).over)over++});
   scalePreview();
   const S=SHELF_SIZES[state.shelf.size];
   $('#stageMeta').innerHTML=total
