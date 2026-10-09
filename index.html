@@ -492,7 +492,7 @@ details.more .fields{margin-top:10px}
       <div class="wiz-step">
         <h3><em>1</em>薬局名</h3>
         <div class="wiz-grid">
-          <div class="field full"><label for="s-name">薬局名<span class="req">必須</span></label><input type="text" id="s-name" placeholder="例：みどり薬局 駅前店" required></div>
+          <div class="field full"><label for="s-name">薬局名<span class="req">必須</span></label><input type="text" id="s-name" placeholder="例：みどり薬局　本町店" required></div>
           <div class="field full"><label for="s-tagline">ひとことキャッチコピー</label><input type="text" id="s-tagline" placeholder="例：からだのこと、気軽に相談できる薬局です"><span class="hint">チラシの見出しや店名の下に入ります（空欄でも大丈夫です）</span></div>
         </div>
       </div>
@@ -746,7 +746,7 @@ function illFor(tplId,f){
   return ILLS[v]?v:(ILL_DEFAULT[tplId]||null);
 }
 
-const SAMPLE_SHOP = {name:'みどり薬局 駅前店',tagline:'',color:'#2f8f5b',features:['kakari','zaitaku','kids','parking'],mood:'auto',
+const SAMPLE_SHOP = {name:'みどり薬局　本町店',tagline:'',color:'#2f8f5b',features:['kakari','zaitaku','kids','parking'],mood:'auto',
   address:'東京都○○区△△ 1-2-3',tel:'03-1234-5678',hours:'月〜金 9:00〜19:00\n土 9:00〜13:00',holiday:'日曜・祝日',logo:''};
 
 /* ---------------- 色のユーティリティ ---------------- */
